@@ -81,5 +81,6 @@ export default class Artplayer {
         customType?: {
             [propName: string]: Function;
         };
+        type?:string;
     });
 }
