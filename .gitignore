@@ -4,5 +4,4 @@ node_modules
 *.log
 examples
 commit.json
-package-lock.json
 yarn.lock

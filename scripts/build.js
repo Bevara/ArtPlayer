@@ -6,7 +6,9 @@ const logger = require('./logger');
 const projects = require('./getProjects')();
 const creatRollupConfig = require('./creatRollupConfig');
 
-const isBuildAll = process.argv.pop() === 'all';
+const project = process.argv.pop();
+const isBuildAll = project === 'all';
+const isBuildProject = project in projects;
 
 function runPromisesInSeries(ps) {
     return ps.reduce((p, next) => p.then(next), Promise.resolve());
@@ -41,6 +43,20 @@ if (isBuildAll) {
     del(dist).then(() => {
         logger.success(`----Delete directory successfully: ${dist}----`);
         runPromisesInSeries(bundles)
+            .then(() => {
+                logger.success('----finished building all packages----');
+            })
+            .catch((err) => {
+                logger.fatal(err);
+            });
+    });
+} else if (isBuildProject){
+    const projectPath = projects[project];
+    const bundle = build(projectPath);
+    const dist = path.join(process.cwd(), 'dist');
+    del(dist).then(() => {
+        logger.success(`----Delete directory successfully: ${dist}----`);
+        bundle
             .then(() => {
                 logger.success('----finished building all packages----');
             })
