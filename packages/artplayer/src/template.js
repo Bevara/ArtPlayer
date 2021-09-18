@@ -32,7 +32,7 @@ export default class Template {
         this.$container.innerHTML = `
           <div class="art-undercover"></div>
           <div class="art-video-player art-subtitle-show art-layer-show" style="--theme: ${theme}">
-            <canvas is="bevara-player" class="art-video"></canvas>
+            <video class="art-video"></video>
             <div class="art-poster"></div>
             <div class="art-subtitle"></div>
             <div class="art-danmuku"></div>
@@ -137,7 +137,7 @@ export default class Template {
     mobile() {
         this.$container.innerHTML = `
           <div class="art-video-player">
-            <canvas is="bevara-player"></canvas>
+            <video class="art-video"></video>
           </div>
         `;
         this.$player = this.query('.art-video-player');
