@@ -5,3 +5,10 @@ node_modules
 examples
 commit.json
 yarn.lock
+.size-snapshot.json
+package-lock.json
+package.json
+package-lock.json
+dist/artplayer.js
+packages/artplayer/dist/artplayer.js
+package-lock.json

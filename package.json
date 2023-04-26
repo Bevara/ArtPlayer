@@ -10,6 +10,7 @@
         "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.js",
         "start": "npx cross-env NODE_ENV=development npx servor docs index.html 8081 5000",
         "build": "npx cross-env NODE_ENV=production node ./scripts/build.js",
+        "build:dev": "npx cross-env NODE_ENV=development node ./scripts/build.js",
         "build:all": "npm run build all && git add . && git commit -m \"build all packages\" -n ",
         "test": "npx cross-env NODE_ENV=test mocha-chrome ./test/index.html --mocha '{\"ui\":\"bdd\"}'",
         "lint": "npx eslint packages/*/src",
