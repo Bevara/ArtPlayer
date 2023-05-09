@@ -4,3 +4,7 @@
 node_modules
 package-lock.json
 yarn.lock
+.size-snapshot.json
+docs/compiled/
+packages/artplayer-plugin-ads/dist/
+packages/artplayer/dist/
