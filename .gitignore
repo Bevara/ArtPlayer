@@ -8,3 +8,5 @@ yarn.lock
 docs/compiled/
 packages/artplayer-plugin-ads/dist/
 packages/artplayer/dist/
+packages/artplayer-plugin-danmuku/dist/
+docs/compiled/
