@@ -10,3 +10,5 @@ packages/artplayer-plugin-ads/dist/
 packages/artplayer/dist/
 packages/artplayer-plugin-danmuku/dist/
 docs/compiled/
+packages/artplayer-tool-thumbnail/dist/
+packages/artplayer-plugin-vtt-thumbnail/dist/
