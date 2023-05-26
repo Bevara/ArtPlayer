@@ -1,0 +1,24 @@
+{
+    "license": "MIT",
+    "version": "0.0.1",
+    "name": "universal-canvas",
+    "types": "types/artplayer-plugin-universal-canvas.d.ts",
+    "description": "Bevara canvas plugin for ArtPlayer",
+    "main": "dist/artplayer-plugin-universal-canvas.js",
+    "legacy": "dist/artplayer-plugin-universal-canvas.legacy.js",
+    "author": "Jerome Gorin <gorinje@gmail.com>",
+    "browserslist": "> 0.5%, last 2 versions, not dead",
+    "homepage": "https://www.bevara.com",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Bevara/ArtPlayer"
+    },
+    "bugs": {
+        "url": "https://github.com/zhw2590582/ArtPlayer/issues"
+    },
+    "keywords": [
+        "html5",
+        "canvas",
+        "player"
+    ]
+}
