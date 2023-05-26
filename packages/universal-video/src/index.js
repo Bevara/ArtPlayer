@@ -24,7 +24,6 @@ export default function UniversalVideo(option) {
                 utils: { query, append, setStyle },
             },
         } = art;
-        console.log(art.video);
 
         option = validator(
             {

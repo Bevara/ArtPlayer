@@ -27,7 +27,6 @@ export default function UniversalCanvas(option) {
                 utils: { query, append, setStyle },
             },
         } = art;
-        console.log(art.video);
 
         option = validator(
             {
@@ -38,12 +37,6 @@ export default function UniversalCanvas(option) {
                 useCache: false,
                 useWorker: false,
                 useWebcodec: false,
-                i18n: {
-                    close: 'close',
-                    countdown: 'countdown',
-                    detail: 'detail',
-                    canBeClosed: 'can be closed',
-                },
                 ...option,
             },
             {
@@ -53,50 +46,17 @@ export default function UniversalCanvas(option) {
                 scriptDirectory: '?string',
                 useCache: '?boolean',
                 useWorker: '?boolean',
-                useWebcodec: '?boolean',
-                i18n: {
-                    close: 'string',
-                    countdown: 'string',
-                    detail: 'string',
-                    canBeClosed: 'string',
-                },
+                useWebcodec: '?boolean'
             },
         );
 
-        let $countdown = null;
 
-        let time = 0;
-        let isEnd = false;
-        let timer = null;
+        const $play = query(".art-icon-play");
+        const $pause = query(".art-icon-pause");
+        const $state = query(".art-state");
+
         let isInit = false;
         let src = null;
-
-        function getI18n(val, str) {
-            return str.replace('%s', val);
-        }
-
-        function play() {
-            if (isEnd) return;
-
-            timer = setTimeout(() => {
-                time += 1;
-
-                $countdown.innerHTML = getI18n(option.totalDuration - time, option.i18n.countdown);
-
-                if (time >= option.totalDuration) {
-                    skip();
-                } else {
-                    play();
-                }
-            }, 1000);
-        }
-
-        function pause() {
-            if (isEnd) return;
-            clearTimeout(timer);
-        }
-
-        Artplayer.RECONNECT_TIME_MAX = -1;
 
         const universalCanvas = document.createElement("canvas", { "is": "universal-canvas" });;
         universalCanvas.classList.add('artplayer-plugin-ads-video');
@@ -138,9 +98,7 @@ export default function UniversalCanvas(option) {
             art.video.src = universalCanvas.src;
         });
 
-        //art.video.parentNode.removeChild(art.video);
-        art.video.src = "";
-        art.template.$universalCanvas = append($player, universalCanvas);
+        art.video.parentNode.removeChild(art.video);
 
         function show() {
             art.template.$ads = append($player, '<div class="artplayer-plugin-ads"></div>');
@@ -151,29 +109,19 @@ export default function UniversalCanvas(option) {
             );
 
             $loading = append(art.template.$ads, '<div class="artplayer-plugin-ads-loading"></div>');
-            //append($loading, loading);
+            append($loading, loading);
+            setStyle($state, 'display', 'none');
 
             $control = append(
                 art.template.$ads,
                 `<div class="artplayer-plugin-ads-control">
-                    <div class="artplayer-plugin-ads-detail">${option.i18n.detail}</div>
                     <div class="artplayer-plugin-ads-muted"></div>
                     <div class="artplayer-plugin-ads-fullscreen"></div>
                 </div>`,
             );
 
-            const $detail = query('.artplayer-plugin-ads-detail', $control);
             const $muted = query('.artplayer-plugin-ads-muted', $control);
             const $fullscreen = query('.artplayer-plugin-ads-fullscreen', $control);
-
-            if (option.url) {
-                art.proxy($detail, 'click', () => {
-                    window.open(option.url);
-                    art.emit('artplayerPluginAds:click', option);
-                });
-            } else {
-                setStyle($detail, 'display', 'none');
-            }
 
             if (src) {
                 const $volume = append($muted, volume);
@@ -227,27 +175,17 @@ export default function UniversalCanvas(option) {
             isInit = true;
 
             show();
-            art.pause();
+            art.proxy($play, 'click', () => {
+                universalCanvas.play();
+            });
 
-            if (src) {
-                art.proxy($ads, 'loadedmetadata', () => {
-                    play();
-                    $ads.play();
-                    setStyle($control, 'display', 'flex');
-                    setStyle($loading, 'display', 'none');
-                });
-            } else {
-                play();
-                setStyle($control, 'display', 'flex');
+            art.proxy($pause, 'click', () => {
+                universalCanvas.pause();
+            });
+
+            art.proxy(universalCanvas, 'loadedmetadata', () => {
                 setStyle($loading, 'display', 'none');
-            }
-
-            art.proxy(document, 'visibilitychange', () => {
-                if (document.hidden) {
-                    pause();
-                } else {
-                    play();
-                }
+                setStyle($state, 'display', 'flex');
             });
         }
 
@@ -258,26 +196,10 @@ export default function UniversalCanvas(option) {
             });
         }
 
-        art.emit('video:canplay');
-        art.on('video:error', async (error) => {
-            //art.mask.show = false;
-            //art.player.classList.remove('art-error');
-            art.emit('video:canplay');
-            
-            //art.emit('play');           
-        });
-
- 
-        art.on('play', async (e) => {
-            art.emit('video:playing');
-        })
-
         init();
 
         return {
-            name: 'UniversalCanvas',
-            pause,
-            play
+            name: 'UniversalCanvas'
         };
     };
 }
