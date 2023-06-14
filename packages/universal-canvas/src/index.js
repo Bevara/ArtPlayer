@@ -1,5 +1,6 @@
 import config from '../../artplayer/src/config';
 import style from 'bundle-text:./style.less';
+import clamp from '../../artplayer/src/utils'; 
 
 function checkVersion(art) {
     const {
@@ -54,6 +55,8 @@ export default function UniversalCanvas(option) {
         const $play = query(".art-icon-play");
         const $pause = query(".art-icon-pause");
         const $state = query(".art-state");
+        const $volume = query(".art-icon-volume");
+        const $slider = query(".art-volume-slider");
 
         let isInit = false;
         let src = null;
@@ -170,9 +173,16 @@ export default function UniversalCanvas(option) {
             });
         }
 
+        function getVolumeFromEvent(event) {
+            const { top, height } = $slider.getBoundingClientRect();
+            return 1 - (event.clientY - top) / height;
+        }
+        
         function init() {
             if (isInit) return;
             isInit = true;
+
+            let isDroging = false;
 
             show();
             art.proxy($play, 'click', () => {
@@ -183,9 +193,33 @@ export default function UniversalCanvas(option) {
                 universalCanvas.pause();
             });
 
+            art.proxy($volume, 'click', () => {
+                art.muted = true;
+                universalCanvas.muted =true;
+            });
+
             art.proxy(universalCanvas, 'loadedmetadata', () => {
                 setStyle($loading, 'display', 'none');
                 setStyle($state, 'display', 'flex');
+            });
+
+            art.proxy($slider, 'mousedown', (event) => {
+                isDroging = event.button === 0;
+                art.volume = getVolumeFromEvent(event);
+                universalCanvas.volume = getVolumeFromEvent(event);
+            });
+
+            art.on('document:mousemove', (event) => {
+                if (isDroging) {
+                    art.muted = false;
+                    art.volume = getVolumeFromEvent(event);
+                }
+            });
+
+            art.on('document:mouseup', () => {
+                if (isDroging) {
+                    isDroging = false;
+                }
             });
         }
 
