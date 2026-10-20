@@ -6,7 +6,9 @@
  */
 const POLL_MS = 250;
 const AUDIO_READY_MS = 3e3;
-const emptyRanges = { length: 0, start: () => 0, end: () => 0 };
+const SEEK_SETTLE_MS = 2e3;
+const SEEK_NEAR_S = 1.5;
+const ranges = (end) => ({ length: end ? 1 : 0, start: () => 0, end: () => end });
 function inherited(el, name) {
   for (let p = Object.getPrototypeOf(el); p; p = Object.getPrototypeOf(p)) {
     const d = Object.getOwnPropertyDescriptor(p, name);
@@ -21,6 +23,7 @@ function mediaFacade(canvas) {
   const solverPlay = () => inherited(canvas, "play")?.value?.call(canvas);
   const solverPause = () => inherited(canvas, "pause")?.value?.call(canvas);
   const solverVolume = (value) => inherited(canvas, "volume")?.set?.call(canvas, value);
+  const solverSet = (properties) => Promise.resolve(canvas._messageHandlerNoWorker?.({ data: { event: "set_properties", properties } })).catch((e) => console.warn(`[universal-canvas] ${Object.keys(properties).join(", ")}: ${e.message}`));
   const state = {
     ready: false,
     paused: true,
@@ -28,13 +31,20 @@ function mediaFacade(canvas) {
     volume: 1,
     muted: false,
     currentTime: 0,
+    // Whether the solver gives the position; else it is estimated.
+    reportsTime: false,
+    duration: Number.NaN,
+    seekTarget: null,
+    seekAt: 0,
     videoWidth: 0,
     videoHeight: 0,
     lastTick: 0,
     upSince: 0,
+    polling: false,
     timer: null
   };
   const fire = (type) => canvas.dispatchEvent(new Event(type));
+  const seekable = () => Number.isFinite(state.duration);
   function sendVolume() {
     if (!state.ready)
       return;
@@ -53,14 +63,33 @@ function mediaFacade(canvas) {
     if (playing)
       fire("playing");
   }
-  async function poll() {
-    if (!canvas._messageHandlerNoWorker || !canvas.properties)
+  function onTime(time) {
+    const now = performance.now();
+    if (state.seekTarget !== null) {
+      if (Math.abs(time - state.seekTarget) > SEEK_NEAR_S && now - state.seekAt < SEEK_SETTLE_MS)
+        return;
+      state.seekTarget = null;
+    }
+    state.reportsTime = true;
+    state.currentTime = time;
+  }
+  function onDuration(duration) {
+    if (!(duration > 0) || duration === state.duration)
       return;
+    state.duration = duration;
+    fire("durationchange");
+  }
+  async function poll() {
+    if (state.polling || !canvas._messageHandlerNoWorker || !canvas.properties)
+      return;
+    state.polling = true;
     let props = null;
     try {
-      props = await canvas.properties(["width", "height"]);
+      props = await canvas.properties(["width", "height", "currentTime", "duration"]);
     } catch {
       return;
+    } finally {
+      state.polling = false;
     }
     if (!props)
       return;
@@ -70,6 +99,9 @@ function mediaFacade(canvas) {
       state.videoWidth = props.width;
       state.videoHeight = props.height;
     }
+    if (props.currentTime >= 0)
+      onTime(props.currentTime);
+    onDuration(props.duration);
     if (!state.ready && (state.videoWidth || now - state.upSince > AUDIO_READY_MS)) {
       state.ready = true;
       sendVolume();
@@ -81,12 +113,26 @@ function mediaFacade(canvas) {
   function tick() {
     if (!state.paused && !state.ended) {
       const now = performance.now();
-      state.currentTime += (now - state.lastTick) / 1e3;
+      if (!state.reportsTime)
+        state.currentTime += (now - state.lastTick) / 1e3;
       state.lastTick = now;
       fire("timeupdate");
     }
-    if (!state.ready)
+    if (!state.ended)
       poll();
+  }
+  function seek(value) {
+    const time = Number(value);
+    if (!state.ready || state.ended || !seekable() || !Number.isFinite(time))
+      return;
+    const target = Math.min(Math.max(0, time), state.duration);
+    state.seekTarget = target;
+    state.seekAt = performance.now();
+    state.currentTime = target;
+    fire("seeking");
+    solverSet({ seek: target });
+    fire("timeupdate");
+    fire("seeked");
   }
   let watched = false;
   function watchEnd() {
@@ -116,16 +162,16 @@ function mediaFacade(canvas) {
     ended: { get: () => state.ended, configurable: true },
     readyState: { get: () => state.ready ? 4 : 0, configurable: true },
     networkState: { get: () => state.ended ? 1 : 2, configurable: true },
-    currentTime: { get: () => state.currentTime, set: () => {
-    }, configurable: true },
-    duration: { get: () => Infinity, configurable: true },
+    seeking: { get: () => state.seekTarget !== null, configurable: true },
+    currentTime: { get: () => state.currentTime, set: seek, configurable: true },
+    duration: { get: () => state.duration, configurable: true },
     playbackRate: { get: () => 1, set: () => {
     }, configurable: true },
     defaultPlaybackRate: { get: () => 1, set: () => {
     }, configurable: true },
-    buffered: { get: () => emptyRanges, configurable: true },
-    seekable: { get: () => emptyRanges, configurable: true },
-    played: { get: () => emptyRanges, configurable: true },
+    buffered: { get: () => ranges(0), configurable: true },
+    seekable: { get: () => ranges(seekable() ? state.duration : 0), configurable: true },
+    played: { get: () => ranges(0), configurable: true },
     videoWidth: { get: () => state.videoWidth, configurable: true },
     videoHeight: { get: () => state.videoHeight, configurable: true },
     volume: {
@@ -177,6 +223,10 @@ function mediaFacade(canvas) {
     canPlayType: { value: () => "", configurable: true, writable: true }
   });
   const facade = {
+    // Whether the source can be sought: its duration is known.
+    get seekable() {
+      return seekable();
+    },
     destroy() {
       clearInterval(state.timer);
       state.timer = null;
