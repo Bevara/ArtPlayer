@@ -23,29 +23,6 @@ console.info(art.option);
 
 :::
 
-## `whitelist`
-
-管理移动设备的白名单功能，只有一个属性 `state` 返回是否启用播放器功能
-
-<div className="run-code">▶ Run Code</div>
-
-```js
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-    whitelist: [(ua) => /iPhone/gi.test(ua)],
-});
-
-console.info(art.whitelist.state);
-```
-
-:::warning 提示
-
-在上面这个例子中，当使用 `iPhone` 访问播放器时，`art.whitelist.state` 会返回 `false`，即使用原生的播放器，而不是 `Artplayer` 播放器
-
-:::
-
-
 ## `template`
 
 管理播放器所有的 `DOM` 元素
@@ -76,7 +53,6 @@ console.info(art.template.$video);
 
 - `proxy` 方法用于代理 `DOM` 事件
 - `hover` 方法用于代理自定义的 `hover` 事件
-- `loadImg` 方法用于监听图片的 `load` 加载事件
 
 <div className="run-code">▶ Run Code</div>
 
@@ -96,10 +72,6 @@ art.events.hover(container, (event) => {
     console.info('mouseenter', event);
 }, (event) => {
     console.info('mouseleave', event);
-});
-
-art.events.loadImg('/assets/sample/poster.jpg').then(img => {
-    console.info('loadImg', img);
 });
 ```
 
@@ -343,6 +315,9 @@ art.on('ready', () => {
 - `url` 属性设置和返回当前字幕地址
 - `style` 方法设置当前字幕的样式
 - `switch` 方法设置当前字幕地址和选项
+- `textTrack` 获取当前字幕轨
+- `activeCues` 获取当前活跃的字幕列表
+- `cues` 获取整体的字幕列表
 
 <div className="run-code">▶ Run Code</div>
 
@@ -357,6 +332,30 @@ art.on('ready', () => {
     art.subtitle.style({
         color: 'red',
     });
+});
+```
+
+## `info`
+
+管理播放器的信息面板，常用于查看当前播放器和视频的运行状态，例如版本号、分辨率、时长等。
+
+- 通过 `art.info.show` 控制面板的显示与隐藏
+- 触发的事件名为 `info`（详见事件文档）
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.info.show = true;
+
+    setTimeout(() => {
+        art.info.show = false;
+    }, 3000);
 });
 ```
 

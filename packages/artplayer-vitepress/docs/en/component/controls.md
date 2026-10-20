@@ -1,22 +1,22 @@
-# 控制器
+# Controls
 
-## 配置
+## Configuration
 
-| 属性       | 类型                | 描述                                       |
-| ---------- | ------------------- | ------------------------------------------ |
-| `disable`  | `Boolean`           | 是否禁用组件                               |
-| `name`     | `String`            | 组件唯一名称，用于标记类名                 |
-| `index`    | `Number`            | 组件索引，用于显示的优先级                 |
-| `html`     | `String`, `Element` | 组件的 DOM 元素                            |
-| `style`    | `Object`            | 组件样式对象                               |
-| `click`    | `Function`          | 组件点击事件                               |
-| `mounted`  | `Function`          | 组件挂载后触发                             |
-| `tooltip`  | `String`            | 组件的提示文本                             |
-| `position` | `String`            | `left` 和 `right` 控制控制器出现的左右位置 |
-| `selector` | `Array`             | 选择列表的对象数组                         |
-| `onSelect` | `Function`          | 选择列表的元素被点击时触发的函数           |
+| Property   | Type                | Description                                      |
+| ---------- | ------------------- | ------------------------------------------------ |
+| `disable`  | `Boolean`           | Whether to disable the control                   |
+| `name`     | `String`            | Unique name of the control, used for class marking |
+| `index`    | `Number`            | Control index, determines display priority       |
+| `html`     | `String`, `Element` | DOM element of the control                       |
+| `style`    | `Object`            | Style object for the control                     |
+| `click`    | `Function`          | Click event handler for the control              |
+| `mounted`  | `Function`          | Triggered after the control is mounted           |
+| `tooltip`  | `String`            | Tooltip text for the control                     |
+| `position` | `String`            | `left` or `right` - controls which side the control appears on |
+| `selector` | `Array`             | Array of objects for selection list              |
+| `onSelect` | `Function`          | Function triggered when a selection list item is clicked |
 
-## 创建
+## Creation
 
 <div className="run-code">▶ Run Code</div>
 
@@ -64,10 +64,10 @@ var art = new Artplayer({
 
 // Get the Element of control by name
 console.info(art.controls['your-button']);
-console.info(art.controls.subtitle);
+console.info(art.controls['subtitle']);
 ```
 
-## 添加
+## Adding
 
 <div className="run-code">▶ Run Code</div>
 
@@ -95,10 +95,10 @@ art.controls.add({
 });
 
 // Get the Element of control by name
-console.info(art.controls.button1);
+console.info(art.controls['button1']);
 ```
 
-## 删除
+## Removal
 
 <div className="run-code">▶ Run Code</div>
 
@@ -128,7 +128,7 @@ art.on('ready', () => {
 });
 ```
 
-## 更新
+## Updating
 
 <div className="run-code">▶ Run Code</div>
 

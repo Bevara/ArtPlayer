@@ -1,0 +1,19 @@
+{
+  "name": "art-player",
+  "version": "1.0.0",
+  "kind": "tags",
+  "description": "<canvas is=\"art-player_1\">: the universal canvas inside an ArtPlayer, whose controls drive the Bevara pipeline",
+  "help": "Customised built-in canvas (is=\"art-player_1\"): plays the source named by src=\"…\" through the solver named by using=\"…\" and the accessors named by with=\"…\", with the ArtPlayer interface (play, pause, volume, fullscreen; progress and seeking once the solver knows the duration). ArtPlayer options go in options='{…}' as JSON. art-player_1.js carries everything, ArtPlayer included.",
+  "tags": ["art-player_1.js"],
+  "extends": { "art-player_1.js": "universal-canvas_1" },
+  "main": "dist",
+  "scripts": { "build": "node ../../../../node_modules/webpack-cli/bin/cli.js --config webpack.config.cjs" },
+  "keywords": ["video", "player", "canvas", "artplayer"],
+  "license": "MIT AND LGPL-3.0-or-later",
+  "homepage": "https://github.com/Bevara/ArtPlayer",
+  "patents": {
+    "status": "royalty-free",
+    "note": "custom HTML element and player interface",
+    "checked": "2026-10-20"
+  }
+}

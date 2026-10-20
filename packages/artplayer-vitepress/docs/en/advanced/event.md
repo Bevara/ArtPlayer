@@ -1,8 +1,8 @@
-# 实例事件
+# Instance Events
 
-播放器的事件分为两种，一种视频的 `原生事件` (前缀 `video:`)，另外一种是 `自定义事件`
+Player events are divided into two types: `native events` of the video (prefixed with `video:`), and `custom events`.
 
-监听事件：
+Listening to events:
 
 <div className="run-code">▶ Run Code</div>
 
@@ -17,7 +17,7 @@ art.on('video:canplay', () => {
 });
 ```
 
-只监听一次事件：
+Listening to an event only once:
 
 <div className="run-code">▶ Run Code</div>
 
@@ -32,7 +32,7 @@ art.once('video:canplay', () => {
 });
 ```
 
-手动触发事件：
+Manually triggering an event:
 
 <div className="run-code">▶ Run Code</div>
 
@@ -45,7 +45,7 @@ var art = new Artplayer({
 art.emit('focus');
 ```
 
-移除事件：
+Removing an event:
 
 <div className="run-code">▶ Run Code</div>
 
@@ -63,7 +63,7 @@ const onReady = () => {
 art.on('ready', onReady);
 ```
 
-:::warning 全部事件请参考以下地址：
+:::warning For a complete list of events, please refer to:
 
 [artplayer/types/events.d.ts](https://github.com/zhw2590582/ArtPlayer/blob/master/packages/artplayer/types/events.d.ts)
 
@@ -71,7 +71,7 @@ art.on('ready', onReady);
 
 ## `ready`
 
-当播放器首次可以播放器时触发
+Triggered when the player is ready for the first time.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -88,7 +88,7 @@ art.on('ready', () => {
 
 ## `restart`
 
-当播放器切换地址后并可以播放时触发
+Triggered when the player switches URLs and becomes ready to play.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -102,14 +102,14 @@ art.on('ready', () => {
     art.url = '/assets/sample/video.mp4'
 });
 
-art.on('restart', () => {
-    console.info('restart');
+art.on('restart', (url) => {
+    console.info('restart', url);
 });
 ```
 
 ## `pause`
 
-当播放器暂停时触发
+Triggered when the player is paused.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -126,7 +126,7 @@ art.on('pause', () => {
 
 ## `play`
 
-当播放器播放时触发
+Triggered when the player starts playing.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -143,7 +143,7 @@ art.on('play', () => {
 
 ## `hotkey`
 
-当播放器热键被按下时触发
+Triggered when a player hotkey is pressed.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -160,7 +160,7 @@ art.on('hotkey', (event) => {
 
 ## `destroy`
 
-当播放器销毁时触发
+Triggered when the player is destroyed.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -179,30 +179,9 @@ art.on('destroy', () => {
 });
 ```
 
-## `url`
-
-当视频地址变化时触发
-
-<div className="run-code">▶ Run Code</div>
-
-```js{10}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('ready', () => {
-    art.url = '/assets/sample/video.mp4?t=0'
-});
-
-art.on('url', (url) => {
-    console.info('url', url);
-});
-```
-
 ## `focus`
 
-当播放器获得焦点时触发
+Triggered when the player gains focus.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -212,14 +191,14 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
 });
 
-art.on('focus', () => {
-    console.info('focus');
+art.on('focus', (event) => {
+    console.info('focus', event);
 });
 ```
 
 ## `blur`
 
-当播放器失去焦点时触发
+Triggered when the player loses focus.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -229,14 +208,14 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
 });
 
-art.on('blur', () => {
-    console.info('blur');
+art.on('blur', (event) => {
+    console.info('blur', event);
 });
 ```
 
 ## `dblclick`
 
-当播放器被双击时触发
+Triggered when the player is double-clicked.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -246,14 +225,14 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
 });
 
-art.on('dblclick', () => {
-    console.info('dblclick');
+art.on('dblclick', (event) => {
+    console.info('dblclick', event);
 });
 ```
 
 ## `click`
 
-当播放器被单击时触发
+Triggered when the player is clicked.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -263,14 +242,14 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
 });
 
-art.on('click', () => {
-    console.info('click');
+art.on('click', (event) => {
+    console.info('click', event);
 });
 ```
 
 ## `error`
 
-当播放器加载视频发生错误时触发
+Triggered when an error occurs while the player is loading a video.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -283,11 +262,12 @@ var art = new Artplayer({
 art.on('error', (error, reconnectTime) => {
     console.info(error, reconnectTime);
 });
+
 ```
 
 ## `hover`
 
-当播放器被鼠标移出或者移入时触发
+Triggered when the mouse enters or leaves the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -297,14 +277,14 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
 });
 
-art.on('hover', (state) => {
-    console.info('hover', state);
+art.on('hover', (state, event) => {
+    console.info('hover', state, event);
 });
 ```
 
 ## `mousemove`
 
-当播放器被鼠标经过时触发
+Triggered when the mouse moves over the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -321,7 +301,7 @@ art.on('mousemove', (event) => {
 
 ## `resize`
 
-当播放器尺寸变化时触发
+Triggered when the player's dimensions change.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -338,7 +318,7 @@ art.on('resize', () => {
 
 ## `view`
 
-当播放器出现在视口时触发
+Triggered when the player enters the viewport.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -353,9 +333,27 @@ art.on('view', (state) => {
 });
 ```
 
+## `lock`
+
+Triggered when the lock state changes on mobile devices.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{6}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    lock: true,
+});
+
+art.on('lock', (state) => {
+    console.info('lock', state);
+});
+```
+
 ## `aspectRatio`
 
-当播放器长宽比变化时触发
+Triggered when the player's aspect ratio changes.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -374,7 +372,7 @@ art.on('aspectRatio', (aspectRatio) => {
 
 ## `autoHeight`
 
-当播放器自动设置高度时触发
+Triggered when the player's height is automatically set.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -385,7 +383,7 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 
 art.on('autoHeight', (height) => {
@@ -395,7 +393,7 @@ art.on('autoHeight', (height) => {
 
 ## `autoSize`
 
-当播放器自动设置尺寸时触发
+Triggered when the player's size is automatically set.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -413,7 +411,7 @@ art.on('autoSize', () => {
 
 ## `flip`
 
-当播放器发生翻转时触发
+Triggered when the player is flipped.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -432,7 +430,7 @@ art.on('flip', (flip) => {
 
 ## `fullscreen`
 
-当播放器发生窗口全屏时触发
+Triggered when the player enters or exits windowed fullscreen mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -448,9 +446,30 @@ art.on('fullscreen', (state) => {
 });
 ```
 
+## `fullscreenError`
+
+Triggered when a windowed fullscreen error occurs.
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+	art.fullscreen = true;
+});
+
+art.on('fullscreenError', (event) => {
+    console.info('fullscreenError', event);
+});
+```
+
 ## `fullscreenWeb`
 
-当播放器发生网页全屏时触发
+Triggered when the player enters or exits web fullscreen mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -468,7 +487,7 @@ art.on('fullscreenWeb', (state) => {
 
 ## `mini`
 
-当播放器进入迷你模式时触发
+Triggered when the player enters or exits mini mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -489,7 +508,7 @@ art.on('mini', (state) => {
 
 ## `pip`
 
-当播放器进入画中画时触发
+Triggered when the player enters or exits Picture-in-Picture mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -503,11 +522,12 @@ var art = new Artplayer({
 art.on('pip', (state) => {
     console.info('pip', state);
 });
+
 ```
 
 ## `screenshot`
 
-当播放器被截图时触发
+Triggered when the player takes a screenshot.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -525,7 +545,7 @@ art.on('screenshot', (dataUri) => {
 
 ## `seek`
 
-当播放器发生时间跳转时触发
+Triggered when the player performs a time seek.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -542,7 +562,7 @@ art.on('seek', (currentTime) => {
 
 ## `subtitleOffset`
 
-当播放器发生字幕偏移时触发
+Triggered when the subtitle offset changes in the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -562,9 +582,9 @@ art.on('subtitleOffset', (offset) => {
 });
 ```
 
-## `subtitleUpdate`
+## `subtitleBeforeUpdate`
 
-当字幕更新时触发
+Triggered before subtitles are updated.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -577,14 +597,34 @@ var art = new Artplayer({
     },
 });
 
-art.on('subtitleUpdate', (text) => {
-    console.info('subtitleUpdate', text);
+art.on('subtitleBeforeUpdate', (cues) => {
+    console.info('subtitleBeforeUpdate', cues);
+});
+```
+
+## `subtitleAfterUpdate`
+
+Triggered after subtitles are updated.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    subtitle: {
+        url: '/assets/sample/subtitle.srt',
+    },
+});
+
+art.on('subtitleAfterUpdate', (cues) => {
+    console.info('subtitleAfterUpdate', cues);
 });
 ```
 
 ## `subtitleLoad`
 
-当字幕加载时触发
+Triggered when subtitles are loaded.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -597,38 +637,14 @@ var art = new Artplayer({
     },
 });
 
-art.on('subtitleLoad', (url) => {
-    console.info('subtitleLoad', url);
-});
-```
-
-## `subtitleSwitch`
-
-当字幕切换时触发
-
-<div className="run-code">▶ Run Code</div>
-
-```js{13}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-    subtitle: {
-        url: '/assets/sample/subtitle.srt',
-    },
-});
-
-art.on('ready', () => {
-    art.subtitle.url = '/assets/sample/subtitle.ass';
-});
-
-art.on('subtitleSwitch', (url) => {
-    console.info('subtitleSwitch', url);
+art.on('subtitleLoad', (option, cues) => {
+    console.info('subtitleLoad', cues, option);
 });
 ```
 
 ## `info`
 
-当信息面板显示或隐藏时触发
+Triggered when the info panel is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -645,7 +661,7 @@ art.on('info', (state) => {
 
 ## `layer`
 
-当自定义层显示或隐藏时触发
+Triggered when a custom layer is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -662,7 +678,7 @@ art.on('layer', (state) => {
 
 ## `loading`
 
-当加载器显示或隐藏时触发
+Triggered when the loader is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -679,7 +695,7 @@ art.on('loading', (state) => {
 
 ## `mask`
 
-当遮罩层显示或隐藏时触发
+Triggered when the mask layer is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -696,7 +712,7 @@ art.on('mask', (state) => {
 
 ## `subtitle`
 
-当字幕层显示或隐藏时触发
+Triggered when the subtitle layer is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -713,7 +729,7 @@ art.on('subtitle', (state) => {
 
 ## `contextmenu`
 
-当右键菜单显示或隐藏时触发
+Triggered when the context menu is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -730,7 +746,7 @@ art.on('contextmenu', (state) => {
 
 ## `control`
 
-当控制器显示或隐藏时触发
+Triggered when the control bar is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -747,7 +763,7 @@ art.on('control', (state) => {
 
 ## `setting`
 
-当设置面板显示或隐藏时触发
+Triggered when the settings panel is shown or hidden.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -761,89 +777,123 @@ var art = new Artplayer({
 art.on('setting', (state) => {
     console.log(state);
 });
+
+```
+
+## `muted`
+
+Triggered when the muted state changes.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{6}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('muted', (state) => {
+    console.log(state);
+});
+```
+
+## `keydown`
+
+Listens for the `keydown` event from the `document`.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{6}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('keydown', (event) => {
+    console.log(event.code);
+});
 ```
 
 ## `video:canplay`
 
-浏览器可以播放媒体文件了，但估计没有足够的数据来支撑播放到结束，不必停下来进一步缓冲内容
+The browser can start playing the media, but estimates there is not enough data to play through to the end without stopping for further buffering.
 
 ## `video:canplaythrough`
 
-浏览器估计它可以在不停止内容缓冲的情况下播放媒体直到结束
+The browser estimates it can play the media through to the end without stopping for buffering.
 
 ## `video:complete`
 
-OfflineAudioContext 渲染完成
+The OfflineAudioContext rendering is complete.
 
 ## `video:durationchange`
 
-duration 属性的值改变时触发
+Triggered when the value of the `duration` property changes.
 
 ## `video:emptied`
 
-媒体内容变为空；例如，当这个 media 已经加载完成（或者部分加载完成），则发送此事件，并调用 load() 方法重新加载它
+The media has become empty; for example, this event is sent when the media has already been loaded (or partially loaded), and the `load()` method is called to reload it.
 
 ## `video:ended`
 
-视频停止播放，因为 media 已经到达结束点
+Playback has stopped because the media has reached its end.
 
 ## `video:error`
 
-获取媒体数据时出错，或者资源类型不是受支持的媒体格式
+An error occurred while fetching the media data, or the resource type is not a supported media format.
 
 ## `video:loadeddata`
 
-media 中的首帧已经完成加载
+The first frame of the media has finished loading.
 
 ## `video:loadedmetadata`
 
-已加载元数据
+Metadata has been loaded.
 
 ## `video:pause`
 
-播放已暂停
+Playback has been paused.
 
 ## `video:play`
 
-播放已开始
+Playback has begun.
 
 ## `video:playing`
 
-由于缺乏数据而暂停或延迟后，播放准备开始
+Playback is ready to start after having been paused or delayed due to lack of data.
 
 ## `video:progress`
 
-在浏览器加载资源时周期性触发
+Fired periodically as the browser loads the resource.
 
 ## `video:ratechange`
 
-播放速率发生变化
+The playback rate has changed.
 
 ## `video:seeked`
 
-跳帧（seek）操作完成
+A seek operation has completed.
 
 ## `video:seeking`
 
-跳帧（seek）操作开始
+A seek operation has begun.
 
 ## `video:stalled`
 
-用户代理（user agent）正在尝试获取媒体数据，但数据意外未出现
+The user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
 
 ## `video:suspend`
 
-媒体数据加载已暂停
+Media data loading has been suspended.
 
 ## `video:timeupdate`
 
-currentTime 属性指定的时间发生变化
+The time indicated by the `currentTime` property has changed.
 
 ## `video:volumechange`
 
-音量发生变化
+The volume has changed.
 
 ## `video:waiting`
 
-由于暂时缺少数据，播放已停止
-
+Playback has stopped because of a temporary lack of data.

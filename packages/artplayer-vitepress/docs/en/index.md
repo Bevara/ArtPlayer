@@ -1,10 +1,6 @@
-::: danger Important Note
-The English document has not yet been completed, everything is subject to the Chinese document.
-:::
+# Installation and Usage
 
-# Install
-
-## Install
+## Installation
 
 ::: code-group
 
@@ -18,6 +14,10 @@ yarn add artplayer
 
 ```bash [pnpm]
 pnpm add artplayer
+```
+
+```bash [bun]
+bun add artplayer
 ```
 
 ```html [script]
@@ -40,18 +40,9 @@ https://unpkg.com/artplayer/dist/artplayer.js
 
 :::
 
-## Use
+## Usage
 
 ::: code-group
-
-```js [index.js]
-import Artplayer from 'artplayer';
-
-const art = new Artplayer({
-    container: '.artplayer-app',
-    url: 'path/to/video.mp4',
-});
-```
 
 ```html [index.html]
 <html>
@@ -67,21 +58,28 @@ const art = new Artplayer({
     </head>
     <body>
         <div class="artplayer-app"></div>
+        <script src="path/to/artplayer.js"></script>
+        <script>
+          const art = new Artplayer({
+              container: '.artplayer-app',
+              url: 'path/to/video.mp4',
+          });
+        </script>
     </body>
 </html>
 ```
 
-::: 
+:::
 
-::: warning Tip
+::: warning Note
 
-The size of the player depends on the size of the `container`, so your `container` must have a size
+The player's dimensions depend on the dimensions of its `container`. Therefore, your `container` must have defined dimensions.
 
 :::
 
-::: tip The following links can see more use examples
+::: tip See more usage examples at the following link
 
-[/packages/artplayer-template](https://github.com/zhw2590582/ArtPlayer/tree/master/packages/artplayer-template)
+[/example](https://github.com/zhw2590582/ArtPlayer/tree/master/example)
 
 :::
 
@@ -91,81 +89,69 @@ The size of the player depends on the size of the `container`, so your `containe
 
 ```vue [Artplayer.vue]
 <template>
-  <div ref="artRef"></div>
+  <div ref="$container" />
 </template>
 
-<script>
-import Artplayer from "artplayer";
+<script setup>
+import Artplayer from 'artplayer'
+import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 
-export default {
-  data() {
-    return {
-      instance: null,
-    };
+const props = defineProps({
+  option: {
+    type: Object,
+    required: true,
   },
-  props: {
-    option: {
-      type: Object,
-      required: true,
-    },
-  },
-  mounted() {
-    this.instance = new Artplayer({
-      ...this.option,
-      container: this.$refs.artRef,
-    });
+})
 
-    this.$nextTick(() => {
-      this.$emit("get-instance", this.instance);
-    });
-  },
-  beforeDestroy() {
-    if (this.instance && this.instance.destroy) {
-      this.instance.destroy(false);
-    }
-  },
-};
+const emit = defineEmits(['getInstance'])
+
+const art = shallowRef(null)
+const $container = ref(null)
+
+onMounted(() => {
+  art.value = new Artplayer({
+    ...props.option,
+    container: $container.value,
+  })
+  emit('getInstance', art.value)
+})
+
+onBeforeUnmount(() => {
+  art.value.destroy(false)
+})
 </script>
 ```
 
 ```vue [app.vue]
 <template>
-  <Artplayer @get-instance="getInstance" :option="option" :style="style" />
+  <Artplayer :option="option" :style="style" @get-instance="getInstance" />
 </template>
 
-<script>
-import Artplayer from "./Artplayer.vue";
+<script setup>
+import { reactive } from 'vue'
+import Artplayer from './Artplayer.vue'
 
-export default {
-  data() {
-    return {
-      option: {
-        url: "path/to/video.mp4",
-      },
-      style: {
-        width: "600px",
-        height: "400px",
-        margin: "60px auto 0",
-      },
-    };
-  },
-  components: {
-    Artplayer,
-  },
-  methods: {
-    getInstance(art) {
-      console.info(art);
-    },
-  },
-};
+const option = reactive({
+  url: 'path/to/video.mp4',
+})
+
+const style = reactive({
+  width: '600px',
+  height: '400px',
+  margin: '60px auto 0',
+})
+
+function getInstance(art) {
+  console.log(art)
+}
 </script>
 ```
 
 :::
 
-::: warning Tip
+::: warning Artplayer is not reactive:
 
-Modifying `option` directly in `Vue.js` will not change the player
+Directly modifying the `option` in `Vue.js` will not update the player.
 
 :::
 
@@ -174,82 +160,122 @@ Modifying `option` directly in `Vue.js` will not change the player
 ::: code-group
 
 ```jsx [Artplayer.jsx]
-import { useEffect, useRef } from 'react';
-import Artplayer from 'artplayer';
+import Artplayer from 'artplayer'
+import { useEffect, useRef } from 'react'
 
 export default function Player({ option, getInstance, ...rest }) {
-    const artRef = useRef();
+  const $container = useRef()
 
-    useEffect(() => {
-        const art = new Artplayer({
-            ...option,
-            container: artRef.current,
-        });
+  useEffect(() => {
+    const art = new Artplayer({
+      ...option,
+      container: $container.current,
+    })
 
-        if (getInstance && typeof getInstance === 'function') {
-            getInstance(art);
-        }
+    if (typeof getInstance === 'function') {
+      getInstance(art)
+    }
 
-        return () => {
-            if (art && art.destroy) {
-                art.destroy(false);
-            }
-        };
-    }, []);
+    return () => art.destroy(false)
+  }, [])
 
-    return <div ref={artRef} {...rest}></div>;
+  return <div ref={$container} {...rest}></div>
 }
 ```
 
 ```jsx [app.jsx]
-import React from 'react';
-import Artplayer from './ArtPlayer.jsx';
+import Artplayer from './Artplayer.jsx'
 
 function App() {
-    return (
-        <div>
-            <Artplayer
-                option={{
-                    url: 'https://artplayer.org/assets/sample/video.mp4',
-                }}
-                style={{
-                    width: '600px',
-                    height: '400px',
-                    margin: '60px auto 0',
-                }}
-                getInstance={(art) => console.info(art)}
-            />
-        </div>
-    );
+  return (
+    <div>
+      <Artplayer
+        option={{
+          url: 'path/to/video.mp4',
+        }}
+        style={{
+          width: '600px',
+          height: '400px',
+          margin: '60px auto 0',
+        }}
+        getInstance={art => console.log(art)}
+      />
+    </div>
+  )
 }
 
-export default App;
+export default App
 ```
 
 :::
 
-::: warning Tip
+::: warning Artplayer is not reactive:
 
-Modifying `option` directly in `React.js` will not change the player
+Directly modifying the `option` in `React.js` will not update the player.
 
 :::
 
-## Syntax hint
+## TypeScript
 
-Sometimes your `js` file will lose the type prompt of `TypeScript`. At this time, you can manually import the type
+The `artplayer.d.ts` file is automatically imported when you import `Artplayer`.
+
+### Vue.js
+
+```vue{3}
+<script setup>
+import Artplayer from 'artplayer';
+const art = shallowRef<Artplayer>(null);
+art.value = new Artplayer();
+</script>
+```
+
+### React.js
+
+```jsx{2}
+import Artplayer from 'artplayer';
+const art = useRef<Artplayer>(null);
+art.current = new Artplayer();
+```
+
+### Option
+
+You can also use the type for the options.
+
+```ts{3}
+import Artplayer, { type Option } from 'artplayer';
+
+const option: Option = {
+    container: '.artplayer-app',
+    url: './assets/sample/video.mp4',
+};
+
+option.volume = 0.5;
+
+const art = new Artplayer(option);
+```
+
+::: tip Full TypeScript Definitions
+
+[packages/artplayer/types](https://github.com/zhw2590582/ArtPlayer/tree/master/packages/artplayer/types)
+
+:::
+
+## JavaScript
+
+Sometimes your `js` files may lose `TypeScript` type hints. In such cases, you can manually import the types.
 
 Variable:
 
-```js
+```js{1-3}
 /**
  * @type {import("artplayer")}
  */
 let art = null;
 ```
 
-Parameters:
+Parameter:
 
-```js
+```js{1-3}
 /**
  * @param {import("artplayer")} art
  */
@@ -258,9 +284,9 @@ function getInstance(art) {
 }
 ```
 
-Properties:
+Property:
 
-```js
+```js{4-6}
 export default {
   data() {
     return {
@@ -273,14 +299,31 @@ export default {
 }
 ```
 
-## Old browsers
+Option:
 
-Production builds of `artplayer.js` are only compatible with the last major version of `Chrome`: `last 1 Chrome version`
+```js{1-3}
+/**
+ * @type {import("artplayer/types/option").Option}
+ */
 
-For older browsers, use the `artplayer.legacy.js` file, compatible up to: `IE 11`
+const option = {
+    container: '.artplayer-app',
+    url: './assets/sample/video.mp4',
+};
+
+option.volume = 0.5;
+
+const art8 = new Artplayer(option);
+```
+
+## Legacy Browsers
+
+The production build `artplayer.js` only supports the latest major version of `Chrome`: `last 1 Chrome version`.
+
+For legacy browsers, you can use the `artplayer.legacy.js` file, which is compatible down to: `IE 11`.
 
 ```js
-import Artplayer from 'artplayer/dist/artplayer.legacy.js';
+import Artplayer from 'artplayer/legacy'
 ```
 
 ::: code-group
@@ -295,8 +338,98 @@ https://unpkg.com/artplayer/dist/artplayer.legacy.js
 
 :::
 
-If you want to be compatible with older browsers, please modify the following configuration and build it yourself:
+::: tip If you need to support even older browsers, modify the following configuration and build it yourself:
 
-Build configuration: [/scripts/build.js](https://github.com/zhw2590582/ArtPlayer/blob/master/scripts/build.js#L29)
+Build configuration: [scripts/build.js](https://github.com/zhw2590582/ArtPlayer/blob/master/scripts/build.js#L29)
 
-Reference documents: [browserslist](https://github.com/browserslist/browserslist#full-list)
+Reference documentation: [browserslist](https://github.com/browserslist/browserslist#full-list)
+
+:::
+
+## ECMAScript Module
+
+::: tip ESM Demo:
+
+[https://artplayer.org/esm.html](https://artplayer.org/esm.html)
+
+:::
+
+Starting from version `5.2.6`, `artplayer` and all plugins also provide an `ESM` version in `mjs` format, such as:
+
+- `artplayer/dist/artplayer.mjs`
+- `artplayer-plugin-danmuku/dist/artplayer-plugin-danmuku.mjs`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ArtPlayer ESM with Import Map</title>
+    <style>
+        #player {
+            width: 640px;
+            height: 360px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "artplayer": "https://unpkg.com/artplayer/dist/artplayer.esm.js"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div id="player"></div>
+    <script type="module">
+        import Artplayer from 'artplayer';
+
+        const art = new Artplayer({
+            container: '#player',
+            url: '/assets/sample/video.mp4',
+        });
+    </script>
+</body>
+
+</html>
+```
+
+## Custom userAgent
+
+Currently, the detection of whether a device is mobile is not always accurate. Sometimes you may want to adjust the player's UI by changing the `userAgent`. Therefore, starting from version `5.2.4`, a global variable `globalThis.CUSTOM_USER_AGENT` has been added.
+
+```html
+<html>
+    <head>
+        <title>ArtPlayer Demo</title>
+        <meta charset="UTF-8" />
+        <style>
+            .artplayer-app {
+                width: 400px;
+                height: 300px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="artplayer-app"></div>
+        <script>globalThis.CUSTOM_USER_AGENT = 'iphone'</script>
+        <script src="path/to/artplayer.js"></script>
+        <script>
+          const art = new Artplayer({
+              container: '.artplayer-app',
+              url: 'path/to/video.mp4',
+          });
+        </script>
+    </body>
+</html>
+```
+
+::: warning Note
+
+You need to modify it before importing the `Artplayer` dependency for it to take effect.
+
+:::

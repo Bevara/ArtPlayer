@@ -1,85 +1,95 @@
-import Artplayer = require('./artplayer');
+import type Artplayer from './artplayer'
 
-type Props<T> = {
-    html: string;
-    icon: string;
-    tooltip: string;
-    $icon: HTMLDivElement;
-    $html: HTMLDivElement;
-    $tooltip: HTMLDivElement;
-    $switch: boolean;
-    $range: HTMLInputElement;
-    $parentItem: Setting;
-    $parentList: Setting[];
-} & Omit<T, 'html' | 'icon' | 'tooltip'>;
+export interface SettingOption extends Omit<Setting, 'html' | 'icon' | 'tooltip'> {
+  html: string
+  icon: string | undefined
+  tooltip: string | undefined
+  $item: HTMLDivElement
+  $icon: HTMLDivElement | undefined
+  $html: HTMLDivElement
+  $tooltip: HTMLDivElement | undefined
+  $switch: HTMLDivElement | undefined
+  $range: HTMLInputElement | undefined
+  $parent: SettingOption | undefined
+  $parents: SettingOption[]
+  $option: SettingOption[]
+  $events: Array<() => void>
+  $formatted: boolean
+}
 
-export type SettingOption = Props<Setting>;
+export interface Setting {
+  /**
+   * Html string or html element of setting name
+   */
+  html: string | HTMLElement
 
-export type Setting = {
-    /**
-     * Html string or html element of setting name
-     */
-    html: string | HTMLElement;
+  /**
+   * Html string or html element of setting icon
+   */
+  icon?: string | HTMLElement
 
-    /**
-     * Html string or html element of setting icon
-     */
-    icon?: string | HTMLElement;
+  /**
+   * The width of setting
+   */
+  width?: number
 
-    /**
-     * The width of setting
-     */
-    width?: number;
+  /**
+   * The tooltip of setting
+   */
+  tooltip?: string | HTMLElement
 
-    /**
-     * The tooltip of setting
-     */
-    tooltip?: string | HTMLElement;
+  /**
+   * Whether the default is selected
+   */
+  default?: boolean
 
-    /**
-     * Whether the default is selected
-     */
-    default?: boolean;
+  /**
+   * Custom selector list
+   */
+  selector?: Setting[]
 
-    /**
-     * Custom selector list
-     */
-    selector?: Setting[];
+  /**
+   * When the setting was mounted
+   */
+  mounted?: (this: Artplayer, panel: HTMLDivElement, item: Setting) => void
 
-    /**
-     * Wnen the setting was mounted
-     */
-    mounted?(this: Artplayer, panel: HTMLDivElement, item: Setting): void;
+  /**
+   * When selector item click
+   */
+  onSelect?: (this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event) => void
 
-    /**
-     * When selector item click
-     */
-    onSelect?(this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event): void;
+  /**
+   * Custom switch item
+   */
+  switch?: boolean
 
-    /**
-     * Custom switch item
-     */
-    switch?: boolean;
+  /**
+   * When switch item click
+   */
+  onSwitch?: (this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event) => void
 
-    /**
-     * When switch item click
-     */
-    onSwitch?(this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event): void;
+  /**
+   * Custom range item
+   */
+  range?: [value?: number, min?: number, max?: number, step?: number]
 
-    /**
-     * Custom range item
-     */
-    range?: [value?: number, min?: number, max?: number, step?: number];
+  /**
+   * When range item change
+   */
+  onRange?: (this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event) => void
 
-    /**
-     * When range item change
-     */
-    onRange?(this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event): void;
+  /**
+   * When range item change in real time
+   */
+  onChange?: (this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event) => void
 
-    /**
-     * When range item change in real time
-     */
-    onChange?(this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event): void;
+  /**
+   * When range item change in real time
+   */
+  onClick?: (this: Artplayer, item: SettingOption, element: HTMLDivElement, event: Event) => void
 
-    [key: string]: any;
-};
+  /**
+   * Allow custom properties
+   */
+  [key: string]: any
+}

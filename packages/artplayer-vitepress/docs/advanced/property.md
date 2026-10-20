@@ -90,6 +90,28 @@ art.on('ready', () => {
 });
 ```
 
+## `reset`
+
+-   Type: `Function`
+
+重置播放器的视频元素：会移除当前 `src` 并调用一次 `load()`，常用于在单页应用中手动释放媒体资源或重新初始化视频标签。
+
+> 注意：全局配置 `Artplayer.REMOVE_SRC_WHEN_DESTROY` 也会在调用 `destroy()` 时自动执行类似逻辑。
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    // 仅重置 video，不移除界面
+    art.reset();
+});
+```
+
 ## `seek`
 
 -   Type: `Setter`
@@ -196,14 +218,12 @@ art.on('ready', () => {
 });
 ```
 
-## `switchUrl`
+## `switch`
 
--   Type: `Function`
+-   Type: `Setter`
 -   Parameter: `String`
 
-设置视频地址，设置时和 `url` 类似，但会执行一些优化操作
-
-函数支持两个参数，第一个为新的视频地址，第二个为可选新的视频名字
+设置视频地址，设置时和 `art.url` 类似，但会执行一些优化操作
 
 <div className="run-code">▶ Run Code</div>
 
@@ -216,19 +236,46 @@ var art = new Artplayer({
 art.on('ready', () => {
     art.seek = 10;
     setTimeout(() => {
-        art.switchUrl('/assets/sample/video.mp4?t=0', 'New Video Name');
+        art.switch = '/assets/sample/video.mp4?t=0';
     }, 3000);
 });
 ```
+
+## `switchUrl`
+
+-   Type: `Function`
+-   Parameter: `String`
+
+设置视频地址，设置时和 `art.url` 类似，但会执行一些优化操作
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.seek = 10;
+    setTimeout(() => {
+        art.switchUrl('/assets/sample/video.mp4?t=0');
+    }, 3000);
+});
+```
+
+:::warning 提示
+
+`art.switch` 和 `art.switchUrl` 的功能是一样的，只是 `art.switchUrl` 方法会返回 `Promise`，当 `resolve` 时表示新地址是可以播放，`reject` 时表示新地址加载错误
+
+:::
 
 ## `switchQuality`
 
 -   Type: `Function`
 -   Parameter: `String`
 
-设置视频画质地址，和 `switchUrl` 类似，但会带上之前的播放进度
-
-函数支持两个参数，第一个为新的视频地址，第二个为可选新的视频名字
+设置视频画质地址，和 `art.switchUrl` 类似，但会带上之前的播放进度
 
 <div className="run-code">▶ Run Code</div>
 
@@ -241,7 +288,7 @@ var art = new Artplayer({
 art.on('ready', () => {
     art.seek = 10;
     setTimeout(() => {
-        art.switchQuality('/assets/sample/video.mp4?t=0', '新视频地址');
+        art.switchQuality('/assets/sample/video.mp4?t=0');
     }, 3000);
 });
 ```
@@ -319,7 +366,7 @@ art.on('ready', () => {
 
 -   Type: `Function`
 
-下载当前视频帧的截图
+下载当前视频帧的截图, 可选参数为截图名字
 
 <div className="run-code">▶ Run Code</div>
 
@@ -330,7 +377,7 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.screenshot();
+    art.screenshot('your-name');
 });
 ```
 
@@ -525,12 +572,12 @@ art.on('ready', () => {
 });
 ```
 
-## `autoSize`
+## `state`
 
 -   Type: `Setter/Getter`
--   Parameter: `Boolean`
+-   Parameter: `String`
 
-设置视频是否自适应尺寸，设置为 `true` 之后它会只执行一次
+获取或设置播放器当前状态，支持：`standard`（正常）、`mini`（迷你窗）、`pip`（画中画）、`fullscreen`（窗口全屏）、`fullscreenWeb`（网页全屏）。
 
 <div className="run-code">▶ Run Code</div>
 
@@ -541,9 +588,27 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    console.info(art.autoSize);
-    art.autoSize = true;
-    console.info(art.autoSize);
+    console.info(art.state); // 默认 standard
+    art.state = 'mini';
+});
+```
+
+## `autoSize`
+
+-   Type: `Function`
+
+设置视频是否自适应尺寸
+
+<div className="run-code">▶ Run Code</div>
+
+```js{8}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.autoSize();
 });
 ```
 
@@ -571,6 +636,28 @@ art.on('ready', () => {
 尺寸和坐标信息是通过 `getBoundingClientRect` 获取的
 
 :::
+
+## `bottom` / `top` / `left` / `right` / `x` / `y` / `width` / `height`
+
+-   Type: `Getter`
+
+这些属性是对 `rect` 的快捷访问：
+
+- `bottom`, `top`, `left`, `right`, `x`, `y`：对应 `DOMRect` 的同名字段
+- `width`, `height`：播放器当前可见宽高
+
+<div className="run-code">▶ Run Code</div>
+
+```js{7}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    console.info(art.width, art.height, art.left, art.top);
+});
+```
 
 ## `flip`
 
@@ -638,42 +725,11 @@ art.on('ready', () => {
 });
 ```
 
-## `loop`
-
--   Type: `Setter/Getter`
--   Parameter: `Array`
-
-设置和获取区间循序播放，单位秒
-
-<div className="run-code">▶ Run Code</div>
-
-```js{8}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('ready', () => {
-    console.info(art.loop);
-    art.loop = [5, 10];
-    console.info(art.loop);
-});
-```
-
-:::warning 提示
-
-删除区间循环播放，只需要设置 `loop` 为 `[]` 即可
-
-`art.loop` 与 `art.option.loop` 是两个不同的东西，请勿弄乱
-
-:::
-
 ## `autoHeight`
 
--   Type: `Setter/Getter`
--   Parameter: `Boolean`
+-   Type: `Function`
 
-当容器只有宽度，该属性可以自动计算出并设置视频的高度，设置为 `true` 之后它会只执行一次
+当容器只有宽度，该属性可以自动计算出并设置视频的高度
 
 <div className="run-code">▶ Run Code</div>
 
@@ -684,11 +740,11 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 
 art.on('resize', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 ```
 
@@ -717,28 +773,6 @@ art.on('ready', () => {
     console.info(art.attr('playsInline'));
     art.attr('playsInline', true);
     console.info(art.attr('playsInline'));
-});
-```
-
-## `title`
-
--   Type: `Setter/Getter`
--   Parameter: `String`
-
-动态获取和设置播放器标题
-
-<div className="run-code">▶ Run Code</div>
-
-```js{8}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('ready', () => {
-    console.info(art.title);
-    art.title = 'New Title';
-    console.info(art.title);
 });
 ```
 
@@ -794,7 +828,7 @@ art.on('ready', () => {
 
 <div className="run-code">▶ Run Code</div>
 
-```js{10}
+```js{9}
 var art = new Artplayer({
     container: '.artplayer-app',
     url: '/assets/sample/video.mp4',
@@ -829,6 +863,25 @@ art.on('video:timeupdate', () => {
 });
 ```
 
+## `loadedTime`
+
+-   Type: `Getter`
+
+已缓存的媒体时长，单位为秒。通常与 `loaded` 一起使用，用于展示缓冲进度细节。
+
+<div className="run-code">▶ Run Code</div>
+
+```js{7}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('video:timeupdate', () => {
+    console.info(art.loadedTime);
+});
+```
+
 ## `played`
 
 -   Type: `Getter`
@@ -856,7 +909,7 @@ art.on('video:timeupdate', () => {
 
 <div className="run-code">▶ Run Code</div>
 
-```js{7-10}
+```js{8-10}
 var container = document.querySelector('.artplayer-app');
 
 var art = new Artplayer({
@@ -927,5 +980,95 @@ art.on('ready', () => {
     console.log(art.cssVar('--art-theme'));
     art.cssVar('--art-theme', 'green');
     console.log(art.cssVar('--art-theme'));
+});
+```
+
+## `quality`
+
+-   Type: `Setter`
+-   Parameter: `Array`
+
+动态设置画质列表
+
+<div className="run-code">▶ Run Code</div>
+
+```js{19-29}
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+	quality: [
+		{
+			default: true,
+			html: 'SD 480P',
+			url: '/assets/sample/video.mp4',
+		},
+		{
+			html: 'HD 720P',
+			url: '/assets/sample/video.mp4',
+		},
+	],
+});
+
+art.on('ready', () => {
+	setTimeout(() => {
+		art.quality = [
+			{
+				default: true,
+				html: '1080P',
+				url: '/assets/sample/video.mp4',
+			},
+			{
+				html: '4K',
+				url: '/assets/sample/video.mp4',
+			},
+		];
+	}, 3000);
+})
+```
+
+## `thumbnails`
+
+-   Type: `Setter/Getter`
+-   Parameter: `Object`
+
+动态设置缩略图
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.thumbnails = {
+        url: '/assets/sample/thumbnails.png',
+        number: 60,
+        column: 10,
+    };
+});
+```
+
+## `subtitleOffset`
+
+-   Type: `Setter/Getter`
+-   Parameter: `Number`
+
+动态设置字幕偏移
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+    subtitle: {
+        url: '/assets/sample/subtitle.srt',
+    },
+});
+
+art.on('ready', () => {
+    art.subtitleOffset = 1;
 });
 ```

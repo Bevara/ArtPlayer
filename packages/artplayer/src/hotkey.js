@@ -1,78 +1,96 @@
-import { isMobile } from './utils';
+import { isMobile, silencePromise } from './utils'
 
 export default class Hotkey {
-    constructor(art) {
-        this.art = art;
-        this.keys = {};
+  constructor(art) {
+    this.art = art
+    this.keys = {}
 
-        if (art.option.hotkey && !isMobile) {
-            this.init();
+    if (!isMobile) {
+      this.init()
+    }
+  }
+
+  init() {
+    const { constructor } = this.art
+
+    if (this.art.option.hotkey) {
+      this.add('Escape', () => {
+        if (this.art.fullscreenWeb) {
+          this.art.fullscreenWeb = false
         }
+      })
+
+      this.add('Space', () => {
+        silencePromise(this.art.toggle())
+      })
+
+      this.add('ArrowLeft', () => {
+        this.art.backward = constructor.SEEK_STEP
+      })
+
+      this.add('ArrowUp', () => {
+        this.art.volume += constructor.VOLUME_STEP
+      })
+
+      this.add('ArrowRight', () => {
+        this.art.forward = constructor.SEEK_STEP
+      })
+
+      this.add('ArrowDown', () => {
+        this.art.volume -= constructor.VOLUME_STEP
+      })
     }
 
-    init() {
-        const { proxy, constructor } = this.art;
-
-        this.add(27, () => {
-            if (this.art.fullscreenWeb) {
-                this.art.fullscreenWeb = false;
+    this.art.on('document:keydown', (event) => {
+      if (this.art.isFocus) {
+        const tag = document.activeElement.tagName.toUpperCase()
+        const editable = document.activeElement.getAttribute('contenteditable')
+        if (
+          tag !== 'INPUT'
+          && tag !== 'TEXTAREA'
+          && editable !== ''
+          && editable !== 'true'
+          && !event.altKey
+          && !event.ctrlKey
+          && !event.metaKey
+          && !event.shiftKey
+        ) {
+          const events = this.keys[event.code]
+          if (events) {
+            event.preventDefault()
+            for (let index = 0; index < events.length; index++) {
+              events[index].call(this.art, event)
             }
-        });
-
-        this.add(32, () => {
-            this.art.toggle();
-        });
-
-        this.add(37, () => {
-            this.art.backward = constructor.SEEK_STEP;
-        });
-
-        this.add(38, () => {
-            this.art.volume += constructor.VOLUME_STEP;
-        });
-
-        this.add(39, () => {
-            this.art.forward = constructor.SEEK_STEP;
-        });
-
-        this.add(40, () => {
-            this.art.volume -= constructor.VOLUME_STEP;
-        });
-
-        proxy(window, 'keydown', (event) => {
-            if (this.art.isFocus) {
-                const tag = document.activeElement.tagName.toUpperCase();
-                const editable = document.activeElement.getAttribute('contenteditable');
-                if (tag !== 'INPUT' && tag !== 'TEXTAREA' && editable !== '' && editable !== 'true') {
-                    const events = this.keys[event.keyCode];
-                    if (events) {
-                        event.preventDefault();
-                        for (let index = 0; index < events.length; index++) {
-                            events[index].call(this.art, event);
-                        }
-                        this.art.emit('hotkey', event);
-                    }
-                }
-            }
-        });
-    }
-
-    add(key, event) {
-        if (this.keys[key]) {
-            this.keys[key].push(event);
-        } else {
-            this.keys[key] = [event];
+            this.art.emit('hotkey', event)
+          }
         }
-        return this;
-    }
+      }
+      this.art.emit('keydown', event)
+    })
+  }
 
-    remove(key, event) {
-        if (this.keys[key]) {
-            const index = this.keys[key].indexOf(event);
-            if (index !== -1) {
-                this.keys[key].splice(index, 1);
-            }
-        }
-        return this;
+  add(key, event) {
+    if (this.keys[key]) {
+      if (!this.keys[key].includes(event)) {
+        this.keys[key].push(event)
+      }
     }
+    else {
+      this.keys[key] = [event]
+    }
+    return this
+  }
+
+  remove(key, event) {
+    if (this.keys[key]) {
+      const index = this.keys[key].indexOf(event)
+      if (index !== -1) {
+        this.keys[key].splice(index, 1)
+      }
+      if (this.keys[key].length === 0) {
+        delete this.keys[key]
+      }
+    }
+    return this
+  }
 }

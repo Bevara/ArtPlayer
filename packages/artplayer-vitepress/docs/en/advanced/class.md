@@ -1,16 +1,10 @@
-# 静态属性
+# Static Properties
 
-这里的 `静态属性` 是指挂载在 `构造函数` 的 `一级属性`，非常少使用
-
-:::warning 提示
-
-有些属性是全大写的，说明这些属性是不稳定的，可能会在将来被更改
-
-:::
+Here, `static properties` refer to the `first-level properties` attached to the `constructor`, which are rarely used.
 
 ## `instances`
 
-返回全部播放器实例的数组，假如你想同时管理多个播放器的时候，可以用到该属性
+Returns an array of all player instances. This property can be useful when you need to manage multiple players simultaneously.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -27,7 +21,7 @@ console.info([...Artplayer.instances]);
 
 ## `version`
 
-返回播放器的版本信息
+Returns the version information of the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -37,7 +31,7 @@ console.info(Artplayer.version);
 
 ## `env`
 
-返回播放器的环境变量
+Returns the environment variables of the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -47,7 +41,7 @@ console.info(Artplayer.env);
 
 ## `build`
 
-返回播放器的打包时间
+Returns the build timestamp of the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -57,7 +51,7 @@ console.info(Artplayer.build);
 
 ## `config`
 
-返回视频的默认配置
+Returns the default configuration for videos.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -67,7 +61,7 @@ console.info(Artplayer.config);
 
 ## `utils`
 
-返回播放器的工具函数集合
+Returns the collection of utility functions for the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -75,7 +69,7 @@ console.info(Artplayer.config);
 console.info(Artplayer.utils);
 ```
 
-:::warning 全部工具函数请参考以下地址：
+:::warning For all utility functions, please refer to the following address:
 
 [artplayer/types/utils.d.ts](https://github.com/zhw2590582/ArtPlayer/blob/master/packages/artplayer/types/utils.d.ts)
 
@@ -83,7 +77,7 @@ console.info(Artplayer.utils);
 
 ## `scheme`
 
-返回播放器选项的校验方案
+Returns the validation schema for player options.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -93,7 +87,7 @@ console.info(Artplayer.scheme);
 
 ## `Emitter`
 
-返回事件分发器的构造函数
+Returns the constructor of the event emitter.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -103,7 +97,7 @@ console.info(Artplayer.Emitter);
 
 ## `validator`
 
-返回选项的校验函数
+Returns the validation function for options.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -113,7 +107,7 @@ console.info(Artplayer.validator);
 
 ## `kindOf`
 
-返回类型检测的函数工具
+Returns the type detection utility function.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -123,7 +117,7 @@ console.info(Artplayer.kindOf);
 
 ## `html`
 
-返回播放器所需的 `html` 字符串
+Returns the `html` string required by the player.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -133,82 +127,10 @@ console.info(Artplayer.html);
 
 ## `option`
 
-返回播放器的默认选项
+Returns the default options of the player.
 
 <div className="run-code">▶ Run Code</div>
 
 ```js
 console.info(Artplayer.option);
 ```
-
-## `DEBUG`
-
-## `CONTEXTMENU`
-
-## `NOTICE_TIME`
-
-## `SETTING_WIDTH`
-
-## `SETTING_ITEM_WIDTH`
-
-## `SETTING_ITEM_HEIGHT`
-
-## `INDICATOR_SIZE`
-
-## `INDICATOR_SIZE_ICON`
-
-## `INDICATOR_SIZE_MOBILE`
-
-## `INDICATOR_SIZE_MOBILE_ICON`
-
-## `VOLUME_PANEL_WIDTH`
-
-## `VOLUME_HANDLE_WIDTH`
-
-## `RESIZE_TIME`
-
-## `SCROLL_TIME`
-
-## `SCROLL_GAP`
-
-## `AUTO_PLAYBACK_MAX`
-
-## `AUTO_PLAYBACK_MIN`
-
-## `AUTO_PLAYBACK_TIMEOUT`
-
-## `RECONNECT_TIME_MAX`
-
-## `RECONNECT_SLEEP_TIME`
-
-## `CONTROL_HIDE_TIME`
-
-## `DB_CLICE_TIME`
-
-## `MOBILE_AUTO_PLAYBACKRATE`
-
-## `MOBILE_AUTO_PLAYBACKRATE_TIME`
-
-## `MOBILE_AUTO_ORIENTATION_TIME`
-
-## `INFO_LOOP_TIME`
-
-## `FAST_FORWARD_VALUE`
-
-## `FAST_FORWARD_TIME`
-
-## `TOUCH_MOVE_RATIO`
-
-## `VOLUME_STEP`
-
-## `SEEK_STEP`
-
-## `PROGRESS_HEIGHT`
-
-## `PLAYBACK_RATE`
-
-## `ASPECT_RATIO`
-
-## `FLIP`
-
-## `FULLSCREEN_WEB_IN_BODY`

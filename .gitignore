@@ -1,7 +1,8 @@
+.env
 .vscode
 .DS_Store
-.parcel-cache
 node_modules
 package-lock.json
+lerna-debug.log
 yarn.lock
 .size-snapshot.json

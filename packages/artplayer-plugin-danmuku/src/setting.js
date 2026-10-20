@@ -1,391 +1,765 @@
-import style from 'bundle-text:./style.less';
-import danmuOn from 'bundle-text:./img/danmu-on.svg';
-import danmuOff from 'bundle-text:./img/danmu-off.svg';
-import danmuConfig from 'bundle-text:./img/danmu-config.svg';
-import danmuStyle from 'bundle-text:./img/danmu-style.svg';
+import $check_off from './img/check_off.svg?raw'
+import $check_on from './img/check_on.svg?raw'
+import $config from './img/config.svg?raw'
+import $mode_0_off from './img/mode_0_off.svg?raw'
+import $mode_0_on from './img/mode_0_on.svg?raw'
+import $mode_1_off from './img/mode_1_off.svg?raw'
+import $mode_1_on from './img/mode_1_on.svg?raw'
+import $mode_2_off from './img/mode_2_off.svg?raw'
+import $mode_2_on from './img/mode_2_on.svg?raw'
+import $off from './img/off.svg?raw'
+import $on from './img/on.svg?raw'
+import $style from './img/style.svg?raw'
+import style from './style.less?inline'
 
-export default function setting(art, danmuku) {
-    const { option } = danmuku;
-    const {
-        template: { $controlsCenter, $player },
-        constructor: {
-            utils: { removeClass, addClass, append, setStyle, tooltip, query, inverseClass, getIcon },
-        },
-    } = art;
+export default class Setting {
+  constructor(art, danmuku) {
+    this.art = art
+    this.danmuku = danmuku
+    this.utils = art.constructor.utils
 
-    setStyle($controlsCenter, 'display', 'flex');
+    const { setStyle } = this.utils
+    const { $controlsCenter } = art.template
+    setStyle($controlsCenter, 'display', 'flex')
 
-    const $danmuOn = getIcon('danmu-on', danmuOn);
-    const $danmuOff = getIcon('danmu-off', danmuOff);
-    const $danmuConfig = getIcon('danmu-config', danmuConfig);
-    const $danmuStyle = getIcon('danmu-style', danmuStyle);
+    this.template = {
+      $controlsCenter,
+      $mount: $controlsCenter,
+      $danmuku: null,
+      $toggle: null,
+      $config: null,
+      $configPanel: null,
+      $configModes: null,
+      $style: null,
+      $stylePanel: null,
+      $styleModes: null,
+      $colors: null,
+      $opacitySlider: null,
+      $opacityValue: null,
+      $marginSlider: null,
+      $marginValue: null,
+      $fontSizeSlider: null,
+      $fontSizeValue: null,
+      $speedSlider: null,
+      $speedValue: null,
+      $input: null,
+      $send: null,
+    }
 
-    function addEmitter() {
-        const colors = [
-            '#FE0302',
-            '#FF7204',
-            '#FFAA02',
-            '#FFD302',
-            '#FFFF00',
-            '#A0EE00',
-            '#00CD00',
-            '#019899',
-            '#4266BE',
-            '#89D5FF',
-            '#CC0273',
-            '#222222',
-            '#9B9B9B',
-            '#FFFFFF',
-        ].map((item) => {
-            const isCurrent = option.color === item ? ' art-current' : '';
-            return `<div class="art-danmuku-style-panel-color${isCurrent}" data-color="${item}" style="background-color:${item}"></div>`;
-        });
+    this.slider = {
+      opacity: null,
+      margin: null,
+      fontSize: null,
+      speed: null,
+    }
 
-        const $emitter = append(
-            $controlsCenter,
-            `
-            <div class="art-danmuku-emitter" style="max-width: ${option.maxWidth ? `${option.maxWidth}px` : '100%'}">
-                <div class="art-danmuku-left">
-                    <div class="art-danmuku-style">
-                        <div class="art-danmuku-style-panel">
-                            <div class="art-danmuku-style-panel-inner">
-                                <div class="art-danmuku-style-panel-title">模式</div>
-                                <div class="art-danmuku-style-panel-modes">
-                                    <div class="art-danmuku-style-panel-mode art-current" data-mode="0">滚动</div>
-                                    <div class="art-danmuku-style-panel-mode" data-mode="1">静止</div>
+    this.emitting = false
+    this.isLock = false
+    this.timer = null
+
+    this.createTemplate()
+    this.createSliders()
+    this.createEvents()
+
+    this.mount(this.option.mount)
+
+    art.on('resize', () => this.resize())
+    art.on('fullscreen', state => this.onFullscreen(state))
+    art.on('fullscreenWeb', state => this.onFullscreen(state))
+
+    art.proxy(this.template.$config, 'mouseenter', () => {
+      this.onMouseEnter({
+        $control: this.template.$config,
+        $panel: this.template.$configPanel,
+      })
+    })
+
+    art.proxy(this.template.$style, 'mouseenter', () => {
+      this.onMouseEnter({
+        $control: this.template.$style,
+        $panel: this.template.$stylePanel,
+      })
+    })
+  }
+
+  static get icons() {
+    return {
+      $on,
+      $off,
+      $config,
+      $style,
+      $mode_0_off,
+      $mode_0_on,
+      $mode_1_off,
+      $mode_1_on,
+      $mode_2_off,
+      $mode_2_on,
+      $check_on,
+      $check_off,
+    }
+  }
+
+  get option() {
+    return this.danmuku.option
+  }
+
+  get outside() {
+    return this.template.$mount !== this.template.$controlsCenter
+  }
+
+  get TEMPLATE() {
+    const { option } = this
+    return `
+            <div class="apd-toggle">
+                ${$on}${$off}
+            </div>
+            <div class="apd-config">
+                ${$config}
+                <div class="apd-config-panel">
+                    <div class="apd-config-panel-inner">
+                        <div class="apd-config-mode">
+                            按类型屏蔽
+                            <div class="apd-modes">
+                                <div data-mode="0" class="apd-mode">
+                                    ${$mode_0_off}${$mode_0_on}
+                                    <div>滚动</div>
                                 </div>
-                                <div class="art-danmuku-style-panel-title">颜色</div>
-                                <div class="art-danmuku-style-panel-colors">
-                                    ${colors.join('')}
+                                <div data-mode="1" class="apd-mode">
+                                    ${$mode_1_off}${$mode_1_on}
+                                    <div>顶部</div>
+                                </div>
+                                <div data-mode="2" class="apd-mode">
+                                    ${$mode_2_off}${$mode_2_on}
+                                    <div>底部</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="apd-config-other">
+                            <div class="apd-other apd-anti-overlap">
+                                ${$check_on}${$check_off}
+                                防止弹幕重叠
+                            </div>
+                            <div class="apd-other apd-sync-video">
+                                ${$check_on}${$check_off}
+                                同步视频速度
+                            </div>
+                        </div>
+                        <div class="apd-config-slider apd-config-opacity">
+                            不透明度
+                            <div class="apd-slider"></div>
+                            <div class="apd-value">未知</div>
+                        </div>
+                        <div class="apd-config-slider apd-config-margin">
+                            显示区域
+                            <div class="apd-slider"></div>
+                            <div class="apd-value">未知</div>
+                        </div>
+                        <div class="apd-config-slider apd-config-fontSize">
+                            弹幕字号
+                            <div class="apd-slider"></div>
+                            <div class="apd-value">未知</div>
+                        </div>
+                        <div class="apd-config-slider apd-config-speed">
+                            弹幕速度
+                            <div class="apd-slider"></div>
+                            <div class="apd-value">未知</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="apd-emitter">
+                <div class="apd-style">
+                    ${$style}
+                    <div class="apd-style-panel">
+                        <div class="apd-style-panel-inner">
+                            <div class="apd-style-mode">
+                                模式
+                                <div class="apd-modes">
+                                    <div data-mode="0" class="apd-mode">
+                                        ${$mode_0_on}
+                                        <div>滚动</div>
+                                    </div>
+                                    <div data-mode="1" class="apd-mode">
+                                        ${$mode_1_on}
+                                        <div>顶部</div>
+                                    </div>
+                                    <div data-mode="2" class="apd-mode">
+                                        ${$mode_2_on}
+                                        <div>底部</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="apd-style-color">
+                                颜色
+                                <div class="apd-colors">
+                                    ${this.COLOR.map(color => `<div data-color="${color}" class="apd-color" style="background-color: ${color}"></div>`).join('')}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input class="art-danmuku-input" maxlength="${option.maxLength}" placeholder="发个弹幕见证当下" />
                 </div>
-                <div class="art-danmuku-send">发送</div>
+                <input class="apd-input" placeholder="发个友善的弹幕见证当下" autocomplete="off" maxLength="${option.maxLength}" />
+                <div class="apd-send">发送</div>
             </div>
-            `,
-        );
+        `
+  }
 
-        const $style = query('.art-danmuku-style', $emitter);
-        const $input = query('.art-danmuku-input', $emitter);
-        const $send = query('.art-danmuku-send', $emitter);
-        const $panel = query('.art-danmuku-style-panel-inner', $emitter);
-        const $modes = query('.art-danmuku-style-panel-modes', $emitter);
-        const $colors = query('.art-danmuku-style-panel-colors', $emitter);
-        const $layer = option.mount || append($player, '<div class="art-layer-danmuku-emitter"></div>');
+  get OPACITY() {
+    return {
+      min: 0,
+      max: 100,
+      steps: [],
+      ...this.option.OPACITY,
+    }
+  }
 
-        if (art.option.backdrop) {
-            addClass($panel, 'art-backdrop-filter');
-        }
+  get FONT_SIZE() {
+    return {
+      min: 12,
+      max: 120,
+      steps: [],
+      ...this.option.FONT_SIZE,
+    }
+  }
 
-        if (option.theme) {
-            addClass($emitter, `art-danmuku-theme-${option.theme}`);
-        }
+  get MARGIN() {
+    return {
+      min: 0,
+      max: 3,
+      steps: [
+        {
+          name: '1/4',
+          value: [10, '75%'],
+        },
+        {
+          name: '半屏',
+          value: [10, '50%'],
+        },
+        {
+          name: '3/4',
+          value: [10, '25%'],
+        },
+        {
+          name: '满屏',
+          value: [10, 10],
+        },
+      ],
+      ...this.option.MARGIN,
+    }
+  }
 
-        let timer = null;
-        let mode = option.mode;
-        let color = option.color;
-        append($style, $danmuStyle);
+  get SPEED() {
+    return {
+      min: 0,
+      max: 4,
+      steps: [
+        {
+          name: '极慢',
+          value: 10,
+        },
+        {
+          name: '较慢',
+          value: 7.5,
+          hide: true,
+        },
+        {
+          name: '适中',
+          value: 5,
+        },
+        {
+          name: '较快',
+          value: 2.5,
+          hide: true,
+        },
+        {
+          name: '极快',
+          value: 1,
+        },
+      ],
+      ...this.option.SPEED,
+    }
+  }
 
-        function countdown(time) {
-            if (time <= 0) {
-                timer = null;
-                $send.innerText = '发送';
-                removeClass($send, 'art-disabled');
-            } else {
-                $send.innerText = time;
-                timer = setTimeout(() => countdown(time - 1), 1000);
-            }
-        }
+  get COLOR() {
+    return this.option.COLOR.length
+      ? this.option.COLOR
+      : [
+          '#FE0302',
+          '#FF7204',
+          '#FFAA02',
+          '#FFD302',
+          '#FFFF00',
+          '#A0EE00',
+          '#00CD00',
+          '#019899',
+          '#4266BE',
+          '#89D5FF',
+          '#CC0273',
+          '#222222',
+          '#9B9B9B',
+          '#FFFFFF',
+        ]
+  }
 
-        function onSend() {
-            const danmu = {
-                mode,
-                color,
-                border: true,
-                text: $input.value.trim(),
-            };
+  query(selector) {
+    const { query } = this.utils
+    const { $danmuku } = this.template
+    return query(selector, $danmuku)
+  }
 
-            if (timer === null && option.beforeEmit(danmu)) {
-                $input.value = '';
-                danmuku.emit(danmu);
-                addClass($send, 'art-disabled');
-                countdown(option.lockTime);
-                art.emit('artplayerPluginDanmuku:emit', danmu);
-            }
-        }
+  append(el, target) {
+    const { append } = this.utils
+    const children = [...el.children]
+    if (children.includes(target))
+      return
+    append(el, target)
+  }
 
-        function onResize() {
-            if ($controlsCenter.clientWidth < option.minWidth) {
-                append($layer, $emitter);
-                setStyle($layer, 'display', 'flex');
-                addClass($emitter, 'art-danmuku-mount');
+  setData(key, value) {
+    const { $player } = this.art.template
+    const { $mount } = this.template
+    $player.dataset[key] = value
+    if (this.outside) {
+      $mount.dataset[key] = value
+    }
+  }
 
-                if (!option.mount) {
-                    setStyle($player, 'marginBottom', '40px');
-                }
-            } else {
-                append($controlsCenter, $emitter);
-                setStyle($layer, 'display', 'none');
-                removeClass($emitter, 'art-danmuku-mount');
+  createTemplate() {
+    const { createElement, tooltip } = this.utils
 
-                if (!option.mount) {
-                    setStyle($player, 'marginBottom', null);
-                }
-            }
-        }
+    const $danmuku = createElement('div')
+    $danmuku.className = 'artplayer-plugin-danmuku'
+    $danmuku.innerHTML = this.TEMPLATE
 
-        art.proxy($send, 'click', onSend);
+    this.template.$danmuku = $danmuku
+    this.template.$toggle = this.query('.apd-toggle')
+    this.template.$config = this.query('.apd-config')
+    this.template.$configPanel = this.query('.apd-config-panel')
+    this.template.$configModes = this.query('.apd-config-mode .apd-modes')
+    this.template.$style = this.query('.apd-style')
+    this.template.$stylePanel = this.query('.apd-style-panel')
+    this.template.$styleModes = this.query('.apd-style-mode .apd-modes')
+    this.template.$colors = this.query('.apd-colors')
+    this.template.$antiOverlap = this.query('.apd-anti-overlap')
+    this.template.$syncVideo = this.query('.apd-sync-video')
+    this.template.$opacitySlider = this.query('.apd-config-opacity .apd-slider')
+    this.template.$opacityValue = this.query('.apd-config-opacity .apd-value')
+    this.template.$marginSlider = this.query('.apd-config-margin .apd-slider')
+    this.template.$marginValue = this.query('.apd-config-margin .apd-value')
+    this.template.$fontSizeSlider = this.query('.apd-config-fontSize .apd-slider')
+    this.template.$fontSizeValue = this.query('.apd-config-fontSize .apd-value')
+    this.template.$speedSlider = this.query('.apd-config-speed .apd-slider')
+    this.template.$speedValue = this.query('.apd-config-speed .apd-value')
+    this.template.$input = this.query('.apd-input')
+    this.template.$send = this.query('.apd-send')
 
-        art.proxy($input, 'keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                onSend();
-            }
-        });
+    const { $toggle } = this.template
 
-        art.proxy($modes, 'click', (event) => {
-            const { dataset } = event.target;
-            if (dataset.mode) {
-                mode = Number(dataset.mode);
-                inverseClass(event.target, 'art-current');
-            }
-        });
+    this.art.on('artplayerPluginDanmuku:show', () => {
+      tooltip($toggle, '关闭弹幕')
+    })
 
-        art.proxy($colors, 'click', (event) => {
-            const { dataset } = event.target;
-            if (dataset.color) {
-                color = dataset.color;
-                inverseClass(event.target, 'art-current');
-            }
-        });
+    this.art.on('artplayerPluginDanmuku:hide', () => {
+      tooltip($toggle, '打开弹幕')
+    })
+  }
 
-        onResize();
-        art.on('resize', () => {
-            if (!art.isInput) {
-                onResize();
-            }
-        });
+  createEvents() {
+    const { $toggle, $configModes, $styleModes, $colors, $antiOverlap, $syncVideo, $send, $input } = this.template
 
-        art.on('destroy', () => {
-            if (option.mount && $emitter.parentElement === option.mount) {
-                option.mount.removeChild($emitter);
-            }
-        });
+    this.art.proxy($toggle, 'click', () => {
+      this.danmuku.config({
+        visible: !this.option.visible,
+      })
+      this.reset()
+    })
+
+    this.art.proxy($configModes, 'click', (event) => {
+      const $mode = event.target.closest('.apd-mode')
+      if (!$mode)
+        return
+      const mode = Number($mode.dataset.mode)
+      if (this.option.modes.includes(mode)) {
+        this.danmuku.config({
+          modes: this.option.modes.filter(m => m !== mode),
+        })
+      }
+      else {
+        this.danmuku.config({
+          modes: [...this.option.modes, mode],
+        })
+      }
+      this.reset()
+    })
+
+    this.art.proxy($antiOverlap, 'click', () => {
+      this.danmuku.config({
+        antiOverlap: !this.option.antiOverlap,
+      })
+      this.reset()
+    })
+
+    this.art.proxy($syncVideo, 'click', () => {
+      this.danmuku.config({
+        synchronousPlayback: !this.option.synchronousPlayback,
+      })
+      this.reset()
+    })
+
+    this.art.proxy($styleModes, 'click', (event) => {
+      const $mode = event.target.closest('.apd-mode')
+      if (!$mode)
+        return
+      const mode = Number($mode.dataset.mode)
+      this.danmuku.config({
+        mode,
+      })
+      this.reset()
+    })
+
+    this.art.proxy($colors, 'click', (event) => {
+      const $color = event.target.closest('.apd-color')
+      if (!$color)
+        return
+      this.danmuku.config({
+        color: $color.dataset.color,
+      })
+      this.reset()
+    })
+
+    this.art.proxy($send, 'click', () => this.emit())
+
+    this.art.proxy($input, 'keypress', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        this.emit()
+      }
+    })
+  }
+
+  createSliders() {
+    this.slider.opacity = this.createSlider({
+      ...this.OPACITY,
+      container: this.template.$opacitySlider,
+      findIndex: () => {
+        return Math.round(this.option.opacity * 100)
+      },
+      onChange: (index) => {
+        const { $opacityValue } = this.template
+        $opacityValue.textContent = `${index}%`
+        this.danmuku.config({
+          opacity: index / 100,
+        })
+      },
+    })
+
+    this.slider.margin = this.createSlider({
+      ...this.MARGIN,
+      container: this.template.$marginSlider,
+      findIndex: () => {
+        return this.MARGIN.steps.findIndex(
+          item => item.value[0] === this.option.margin[0] && item.value[1] === this.option.margin[1],
+        )
+      },
+      onChange: (index) => {
+        const margin = this.MARGIN.steps[index]
+        if (!margin)
+          return
+        const { $marginValue } = this.template
+        $marginValue.textContent = margin.name
+        this.danmuku.config({
+          margin: margin.value,
+        })
+      },
+    })
+
+    this.slider.fontSize = this.createSlider({
+      ...this.FONT_SIZE,
+      container: this.template.$fontSizeSlider,
+      findIndex: () => {
+        return this.danmuku.fontSize
+      },
+      onChange: (index) => {
+        const { $fontSizeValue } = this.template
+        $fontSizeValue.textContent = `${index}px`
+        if (index === this.danmuku.fontSize)
+          return
+        this.danmuku.config({
+          fontSize: index,
+        })
+      },
+    })
+
+    this.slider.speed = this.createSlider({
+      ...this.SPEED,
+      container: this.template.$speedSlider,
+      findIndex: () => {
+        return this.SPEED.steps.findIndex(item => item.value === this.option.speed)
+      },
+      onChange: (index) => {
+        const speed = this.SPEED.steps[index]
+        if (!speed)
+          return
+        const { $speedValue } = this.template
+        $speedValue.textContent = speed.name
+        this.danmuku.config({
+          speed: speed.value,
+        })
+      },
+    })
+  }
+
+  createSlider({ min, max, container, findIndex, onChange, steps = [] }) {
+    const { query, clamp, setStyle } = this.utils
+
+    setStyle(container, 'touch-action', 'none')
+
+    container.innerHTML = `
+            <div class="apd-slider-line">
+                <div class="apd-slider-points">
+                    ${steps.map(() => `<div class="apd-slider-point"></div>`).join('')}
+                </div>
+                <div class="apd-slider-progress"></div>
+            </div>
+            <div class="apd-slider-dot"></div>
+            <div class="apd-slider-steps">
+                ${steps.map(step => (step.hide ? '' : `<div class="apd-slider-step">${step.name}</div>`)).join('')}
+            </div>
+        `
+
+    const $dot = query('.apd-slider-dot', container)
+    const $progress = query('.apd-slider-progress', container)
+
+    let isDroging = false
+
+    function reset(index = findIndex()) {
+      if (index < min || index > max)
+        return
+      const percentage = (index - min) / (max - min)
+      $dot.style.left = `${percentage * 100}%`
+      if (steps.length === 0) {
+        $progress.style.width = $dot.style.left
+      }
+      onChange(index)
     }
 
-    function addControl() {
-        art.controls.add({
-            position: 'right',
-            name: 'danmuku',
-            click: function () {
-                if (danmuku.isHide) {
-                    danmuku.show();
-                    art.notice.show = '弹幕显示';
-                    setStyle($danmuOn, 'display', null);
-                    setStyle($danmuOff, 'display', 'none');
-                } else {
-                    danmuku.hide();
-                    art.notice.show = '弹幕隐藏';
-                    setStyle($danmuOn, 'display', 'none');
-                    setStyle($danmuOff, 'display', null);
-                }
-            },
-            mounted($ref) {
-                append($ref, $danmuOn);
-                append($ref, $danmuOff);
-                tooltip($ref, '弹幕开关');
-                setStyle($danmuOff, 'display', 'none');
-            },
-        });
+    function updateLeft(event) {
+      const { top, height, left, width } = container.getBoundingClientRect()
+      if (this.art.isRotate) {
+        const value = clamp(event.clientY - top, 0, height)
+        const index = Math.round((value / height) * (max - min) + min)
+        reset(index)
+      }
+      else {
+        const value = clamp(event.clientX - left, 0, width)
+        const index = Math.round((value / width) * (max - min) + min)
+        reset(index)
+      }
     }
 
-    function addSetting() {
-        art.setting.add({
-            width: 270,
-            name: 'danmuku',
-            html: '弹幕设置',
-            tooltip: '更多',
-            icon: $danmuConfig,
-            selector: [
-                {
-                    width: 200,
-                    html: '播放速度',
-                    icon: '',
-                    tooltip: '适中',
-                    selector: [
-                        {
-                            html: '极慢',
-                            time: 10,
-                        },
-                        {
-                            html: '较慢',
-                            time: 7.5,
-                        },
-                        {
-                            default: true,
-                            html: '适中',
-                            time: 5,
-                        },
-                        {
-                            html: '较快',
-                            time: 2.5,
-                        },
-                        {
-                            html: '极快',
-                            time: 1,
-                        },
-                    ],
-                    onSelect: function (item) {
-                        danmuku.config({
-                            speed: item.time,
-                        });
-                        return item.html;
-                    },
-                },
-                {
-                    width: 200,
-                    html: '字体大小',
-                    icon: '',
-                    tooltip: '适中',
-                    selector: [
-                        {
-                            html: '极小',
-                            fontSize: '4%',
-                        },
-                        {
-                            html: '较小',
-                            fontSize: '5%',
-                        },
-                        {
-                            default: true,
-                            html: '适中',
-                            fontSize: '6%',
-                        },
-                        {
-                            html: '较大',
-                            fontSize: '7%',
-                        },
-                        {
-                            html: '极大',
-                            fontSize: '8%',
-                        },
-                    ],
-                    onSelect: function (item) {
-                        danmuku.config({
-                            fontSize: item.fontSize,
-                        });
-                        return item.html;
-                    },
-                },
-                {
-                    width: 200,
-                    html: '不透明度',
-                    icon: '',
-                    tooltip: '100%',
-                    selector: [
-                        {
-                            default: true,
-                            opacity: 1,
-                            html: '100%',
-                        },
-                        {
-                            opacity: 0.75,
-                            html: '75%',
-                        },
-                        {
-                            opacity: 0.5,
-                            html: '50%',
-                        },
-                        {
-                            opacity: 0.25,
-                            html: '25%',
-                        },
-                        {
-                            opacity: 0,
-                            html: '0%',
-                        },
-                    ],
-                    onSelect: function (item) {
-                        danmuku.config({
-                            opacity: item.opacity,
-                        });
-                        return item.html;
-                    },
-                },
-                {
-                    width: 200,
-                    html: '显示范围',
-                    icon: '',
-                    tooltip: '3/4',
-                    selector: [
-                        {
-                            html: '1/4',
-                            margin: [10, '75%'],
-                        },
-                        {
-                            html: '半屏',
-                            margin: [10, '50%'],
-                        },
-                        {
-                            default: true,
-                            html: '3/4',
-                            margin: [10, '25%'],
-                        },
-                        {
-                            html: '满屏',
-                            margin: [10, 10],
-                        },
-                    ],
-                    onSelect: function (item) {
-                        danmuku.config({
-                            margin: item.margin,
-                        });
-                        return item.html;
-                    },
-                },
-                {
-                    html: '弹幕防重叠',
-                    icon: '',
-                    tooltip: option.antiOverlap ? '开启' : '关闭',
-                    switch: option.antiOverlap,
-                    onSwitch(item) {
-                        danmuku.config({
-                            antiOverlap: !item.switch,
-                        });
-                        item.tooltip = item.switch ? '关闭' : '开启';
-                        return !item.switch;
-                    },
-                },
-                {
-                    html: '同步视频速度',
-                    icon: '',
-                    tooltip: option.synchronousPlayback ? '开启' : '关闭',
-                    switch: option.synchronousPlayback,
-                    onSwitch(item) {
-                        danmuku.config({
-                            synchronousPlayback: !item.switch,
-                        });
-                        item.tooltip = item.switch ? '关闭' : '开启';
-                        return !item.switch;
-                    },
-                },
-            ],
-        });
+    this.art.proxy(container, 'click', (event) => {
+      updateLeft.call(this, event)
+    })
+
+    this.art.proxy(container, 'pointerdown', (event) => {
+      isDroging = event.button === 0
+    })
+
+    this.art.on('document:pointermove', (event) => {
+      if (isDroging) {
+        updateLeft.call(this, event)
+      }
+    })
+
+    this.art.on('document:pointerup', (event) => {
+      if (isDroging) {
+        isDroging = false
+        updateLeft.call(this, event)
+      }
+    })
+
+    return { reset }
+  }
+
+  onFullscreen(state) {
+    const { $danmuku, $controlsCenter, $mount } = this.template
+    if (this.outside) {
+      if (state) {
+        this.append($controlsCenter, $danmuku)
+      }
+      else {
+        this.append($mount, $danmuku)
+      }
+    }
+    else {
+      this.append($controlsCenter, $danmuku)
+    }
+  }
+
+  onMouseEnter({ $control, $panel }) {
+    const { $player } = this.art.template
+    const controlRect = $control.getBoundingClientRect()
+    const panelRect = $panel.getBoundingClientRect()
+    const playerRect = $player.getBoundingClientRect()
+
+    const half = panelRect.width / 2 - controlRect.width / 2
+    const left = playerRect.left - (controlRect.left - half)
+    const right = controlRect.right + half - playerRect.right
+
+    if (left > 0) {
+      $panel.style.left = `${-half + left}px`
+    }
+    else if (right > 0) {
+      $panel.style.left = `${-half - right}px`
+    }
+    else {
+      $panel.style.left = `${-half}px`
+    }
+  }
+
+  async emit() {
+    const { $input } = this.template
+
+    const text = $input.value.trim()
+    if (!text.length)
+      return
+    if (this.isLock)
+      return
+    if (this.emitting)
+      return
+
+    const danmu = {
+      text,
+      mode: this.option.mode,
+      color: this.option.color,
+      time: this.art.currentTime,
     }
 
-    addEmitter();
-    addControl();
-    addSetting();
+    try {
+      this.emitting = true
+      const state = await this.option.beforeEmit(danmu)
+      this.emitting = false
+
+      if (state !== true)
+        return
+
+      danmu.border = true
+      delete danmu.time
+      this.danmuku.emit(danmu)
+      $input.value = ''
+
+      this.lock()
+    }
+    catch (error) {
+      console.error('Error emitting danmuku:', error)
+      this.emitting = false
+    }
+  }
+
+  lock() {
+    const { addClass } = this.utils
+    const { $send } = this.template
+
+    this.isLock = true
+    let time = this.option.lockTime
+    $send.textContent = time
+    addClass($send, 'apd-lock')
+
+    const loop = () => {
+      this.timer = setTimeout(() => {
+        if (time === 0) {
+          this.unlock()
+        }
+        else {
+          time -= 1
+          $send.textContent = time
+          loop()
+        }
+      }, 1000)
+    }
+
+    loop()
+  }
+
+  unlock() {
+    const { removeClass } = this.utils
+    const { $send } = this.template
+    clearTimeout(this.timer)
+    this.isLock = false
+    $send.textContent = '发送'
+    removeClass($send, 'apd-lock')
+  }
+
+  resize() {
+    if (this.outside)
+      return
+    if (this.art.fullscreen)
+      return
+    if (this.art.fullscreenWeb)
+      return
+    const { $player, $controlsCenter } = this.art.template
+    const { $danmuku } = this.template
+    if (this.art.width < this.option.width) {
+      this.append($player, $danmuku)
+    }
+    else {
+      this.append($controlsCenter, $danmuku)
+    }
+  }
+
+  reset() {
+    const { inverseClass, tooltip } = this.utils
+    const { $toggle, $colors } = this.template
+
+    this.slider.opacity.reset()
+    this.slider.margin.reset()
+    this.slider.fontSize.reset()
+    this.slider.speed.reset()
+
+    this.setData('danmukuVisible', this.option.visible)
+    this.setData('danmukuMode', this.option.mode)
+    this.setData('danmukuColor', this.option.color)
+    this.setData('danmukuMode0', this.option.modes.includes(0))
+    this.setData('danmukuMode1', this.option.modes.includes(1))
+    this.setData('danmukuMode2', this.option.modes.includes(2))
+    this.setData('danmukuAntiOverlap', this.option.antiOverlap)
+    this.setData('danmukuSyncVideo', this.option.synchronousPlayback)
+    this.setData('danmukuTheme', this.option.theme)
+    this.setData('danmukuEmitter', this.option.emitter)
+
+    const colors = $colors.children
+    const $color = Array.from(colors).find(item => item.dataset.color === this.option.color.toUpperCase())
+    $color && inverseClass($color, 'apd-active')
+
+    tooltip($toggle, this.option.visible ? '关闭弹幕' : '打开弹幕')
+
+    this.resize()
+  }
+
+  mount(target) {
+    const { errorHandle } = this.utils
+    const $el = typeof target === 'string' ? document.querySelector(target) : target
+    errorHandle($el, `Can not find the mount point: ${target}`)
+    this.append($el, this.template.$danmuku)
+    this.template.$mount = $el
+    this.reset()
+  }
 }
 
 if (typeof document !== 'undefined') {
-    if (!document.getElementById('artplayer-plugin-danmuku')) {
-        const $style = document.createElement('style');
-        $style.id = 'artplayer-plugin-danmuku';
-        $style.textContent = style;
-        document.head.appendChild($style);
+  const id = 'artplayer-plugin-danmuku'
+  let $style = document.getElementById(id)
+  if (!$style) {
+    $style = document.createElement('style')
+    $style.id = id
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.head.appendChild($style)
+      })
     }
+    else {
+      (document.head || document.documentElement).appendChild($style)
+    }
+  }
+  $style.textContent = style
 }

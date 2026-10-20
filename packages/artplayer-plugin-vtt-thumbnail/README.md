@@ -1,6 +1,6 @@
 # artplayer-plugin-vtt-thumbnail
 
-vtt thumbnail plugin for ArtPlayer
+Vtt thumbnail plugin for ArtPlayer
 
 ## Demo
 
@@ -8,4 +8,4 @@ vtt thumbnail plugin for ArtPlayer
 
 ## License
 
-MIT © Harvey Zack
+MIT © Harvey Zhao

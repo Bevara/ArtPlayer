@@ -1,112 +1,104 @@
+/* Plays a source the browser cannot decode by transcoding it first through the
+ * Bevara universal video (<video is="universal-video_1">), hidden in the
+ * player: once it hands back a playable file, ArtPlayer switches to it.
+ * The element must be defined, by universal-video_1.js (or
+ * universal-tags_1.js) on the page, or by the script named in option.script. */
+
+const TAG = 'universal-video_1'
+
 function checkVersion(art) {
+  const {
+    version,
+    utils: { errorHandle },
+  } = art.constructor
+  const arr = version.split('.').map(Number)
+  const major = arr[0]
+  const minor = arr[1] / 100
+  errorHandle(
+    major + minor >= 5,
+    `Artplayer.js@${version} is not compatible the universalVideo. Please update it to version Artplayer.js@5.x.x`,
+  )
+}
+
+function loadScript(src) {
+  if (!src || customElements.get(TAG) || document.querySelector(`script[src="${src}"]`))
+    return
+  const script = document.createElement('script')
+  script.src = src
+  document.head.appendChild(script)
+}
+
+export default function universalVideo(option = {}) {
+  return (art) => {
+    checkVersion(art)
+
     const {
-        version,
-        utils: { errorHandle },
-    } = art.constructor;
-    const arr = version.split('.').map(Number);
-    const major = arr[0];
-    const minor = arr[1] / 100;
-    errorHandle(
-        major + minor >= 5,
-        `Artplayer.js@${version} is not compatible the UniversalVideo@${UniversalVideo.version}. Please update it to version Artplayer.js@5.x.x`,
-    );
-}
+      template: { $player },
+      constructor: {
+        validator,
+        utils: { append, setStyle },
+      },
+    } = art
 
-export default function UniversalVideo(option) {
-    return (art) => {
-        checkVersion(art);
+    option = validator(
+      {
+        using: '',
+        with: '',
+        scriptDirectory: '',
+        script: '',
+        useCache: false,
+        useWorker: false,
+        useWebcodec: false,
+        ...option,
+      },
+      {
+        using: '?string',
+        with: '?string',
+        scriptDirectory: '?string',
+        script: '?string',
+        useCache: '?boolean',
+        useWorker: '?boolean',
+        useWebcodec: '?boolean',
+      },
+    )
 
-        const {
-            template: { $player },
-            icons: { volume, volumeClose, fullscreenOn, fullscreenOff, loading },
-            constructor: {
-                validator,
-                utils: { query, append, setStyle },
-            },
-        } = art;
+    loadScript(option.script)
 
-        option = validator(
-            {
-                using: '',
-                with: '',
-                scriptDirectory: '',
-                useCache: false,
-                useWorker: false,
-                useWebcodec: false,
-                ...option,
-            },
-            {
-                using: '?string',
-                with: '?string',
-                scriptDirectory: '?string',
-                useCache: '?boolean',
-                useWorker: '?boolean',
-                useWebcodec: '?boolean',
+    // The source fails natively until the transcoded file is ready: keep the
+    // player waiting instead of giving up after a few reconnections.
+    art.constructor.RECONNECT_TIME_MAX = Number.MAX_SAFE_INTEGER
 
-            },
-        );
+    const video = document.createElement('video', { is: TAG })
+    video.setAttribute('is', TAG)
+    const source = art.option.url
+    if (source)
+      video.setAttribute('src', source)
+    if (option.using)
+      video.setAttribute('using', option.using)
+    if (option.with)
+      video.setAttribute('with', option.with)
+    if (option.scriptDirectory)
+      video.setAttribute('script-directory', option.scriptDirectory)
+    if (option.useCache)
+      video.setAttribute('use-cache', '')
+    if (option.useWorker)
+      video.setAttribute('use-worker', '')
+    if (option.useWebcodec)
+      video.setAttribute('use-webcodec', '')
 
-        Artplayer.RECONNECT_TIME_MAX = Number.MAX_SAFE_INTEGER;
+    video.addEventListener('ready', () => {
+      art.url = video.src
+    })
 
-        const universalVideo = document.createElement("video", { "is": "universal-video" });;
+    setStyle(video, 'display', 'none')
+    art.template.$universalVideo = append($player, video)
 
-        if (art.video.src && art.video.src != "") {
-            universalVideo.setAttribute("src", art.video.src);
-        }
-
-        if (option.using && option.using != "") {
-            universalVideo.setAttribute("using", option.using);
-        }
-
-        if (option.with && option.with != "") {
-            universalVideo.setAttribute("with", option.with);
-        }
-
-        if (option.scriptDirectory && option.scriptDirectory != "") {
-            universalVideo.setAttribute("script-directory", option.scriptDirectory);
-        }
-
-        if (option.useCache) {
-            universalVideo.setAttribute("use-cache", "");
-        }
-
-        if (option.useWorker) {
-            universalVideo.setAttribute("use-worker", "");
-        }
-
-        if (option.useWebcodec) {
-            universalVideo.setAttribute("use-webcodec", "");
-        }
-
-        universalVideo.addEventListener('ready', () => {
-            art.video.src = universalVideo.src;
-        });
-
-        setStyle(universalVideo, 'display', 'none');
-
-        //art.video.parentNode.removeChild(art.video);
-        art.template.$universalVideo = append($player, universalVideo);
-
-        return {
-            name: 'UniversalVideo'
-        };
-    };
-}
-
-UniversalVideo.env = process.env.NODE_ENV;
-UniversalVideo.version = process.env.APP_VER;
-UniversalVideo.build = process.env.BUILD_DATE;
-
-if (typeof document !== 'undefined') {
-    const script = "https://bevara.ddns.net/accessors/universal-video.js"
-    const scripts = document.querySelectorAll(`script[src$="${script}"]`);
-    if (scripts.length == 0) {
-        const script_elt = document.createElement('script');
-        script_elt.src = script;
-        document.head.appendChild(script_elt);
+    return {
+      name: 'universalVideo',
     }
+  }
 }
 
 if (typeof window !== 'undefined') {
-    window['UniversalVideo'] = UniversalVideo;
+  window.universalVideo = universalVideo
 }

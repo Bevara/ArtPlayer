@@ -1,62 +1,63 @@
 {
-    "name": "artplayer-packages",
-    "version": "5.0.0",
-    "type": "module",
-    "description": "ArtPlayer.js is a modern and full featured HTML5 video player",
-    "scripts": {
-        "build:all": "npm run build all && npm run build:sw && npm run build:ts && npm run build:docs",
-        "bootstrap": "npx lerna bootstrap --hoist",
-        "lint": "npx eslint packages/*/src",
-        "build:sw": "node ./scripts/build-sw.js",
-        "build:ts": "node ./scripts/build-ts.js",
-        "build:docs": "node ./scripts/build-docs.js",
-        "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.js",
-        "build": "npx cross-env NODE_ENV=production node ./scripts/build.js",
-        "test": "npx cross-env NODE_ENV=test mocha-chrome ./test/index.html --mocha '{\"ui\":\"bdd\"}'",
-        "prettier": "npx prettier --write .",
-        "postinstall": "npm run bootstrap"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/zhw2590582/ArtPlayer.git"
-    },
-    "keywords": [
-        "video",
-        "player"
-    ],
-    "author": "Harvey Zack <laozhaochaguan@gmail.com>",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/zhw2590582/ArtPlayer/issues"
-    },
-    "homepage": "https://artplayer.org",
-    "browserslist": "> 0.5%, last 2 versions, not dead",
-    "dependencies": {
-        "@babel/eslint-parser": "^7.21.3",
-        "@babel/preset-react": "^7.18.6",
-        "@parcel/config-default": "^2.8.3",
-        "@parcel/core": "^2.8.3",
-        "@parcel/optimizer-data-url": "^2.8.3",
-        "@parcel/reporter-cli": "^2.8.3",
-        "@parcel/transformer-inline-string": "^2.8.3",
-        "@parcel/transformer-less": "^2.8.3",
-        "@parcel/transformer-vue": "^2.8.3",
-        "artplayer": "latest",
-        "chai": "^4.3.7",
-        "cpy": "^9.0.1",
-        "cross-env": "^7.0.3",
-        "cross-spawn": "^7.0.3",
-        "eslint": "^8.38.0",
-        "glob": "^10.1.0",
-        "lerna": "^6.6.1",
-        "mocha": "^10.2.0",
-        "mocha-chrome": "^2.2.0",
-        "prettier": "^2.8.7",
-        "prompts": "^2.4.2",
-        "servor": "^4.0.2",
-        "workbox-build": "^6.5.4"
-    },
-    "engines": {
-        "node": ">= 16.0.0"
-    }
+  "name": "artplayer-packages",
+  "type": "module",
+  "version": "6.1.0",
+  "private": true,
+  "description": "ArtPlayer.js is a modern and full featured HTML5 video player",
+  "workspaces": [
+    "packages/*"
+  ],
+  "author": "Harvey Zhao <laozhaochaguan@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://artplayer.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhw2590582/ArtPlayer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zhw2590582/ArtPlayer/issues"
+  },
+  "keywords": [
+    "video",
+    "player"
+  ],
+  "engines": {
+    "node": ">= 20.0.0"
+  },
+  "scripts": {
+    "bootstrap": "npx lerna link",
+    "postinstall": "npx lerna run prepare",
+    "build:ts": "node ./scripts/build-ts.js",
+    "build:llm": "node ./scripts/build-llm.js",
+    "build:docs": "node ./scripts/build-docs.js",
+    "build:i18n": "node ./scripts/build-i18n.js",
+    "build:test": "node ./scripts/build-test.js",
+    "test:playback": "node --test test/playback.test.js",
+    "trans:docs": "node ./scripts/trans-docs.js",
+    "create:plugin": "node ./scripts/plugin/create.js",
+    "test:dash-control": "node --test test/dash-control.test.js",
+    "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.js",
+    "build": "npx cross-env NODE_ENV=production node ./scripts/build.js",
+    "lint": "npx eslint packages/*/{src,types,package.json} scripts/*.js test/* docs/assets/ts/* --fix",
+    "build:all": "npm run build all && npm run build:i18n && npm run build:ts && npm run build:docs && npm run lint"
+  },
+  "browserslist": "last 1 Chrome version",
+  "dependencies": {
+    "@antfu/eslint-config": "^5.1.0",
+    "cpy": "^13.2.1",
+    "cross-env": "^10.0.0",
+    "cross-spawn": "^7.0.6",
+    "dotenv": "^17.2.1",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.32.0",
+    "eslint-plugin-format": "^2.0.1",
+    "glob": "^13.0.6",
+    "lerna": "^8.2.3",
+    "less": "^4.5.1",
+    "prompts": "^2.4.2",
+    "servor": "^4.0.2",
+    "svgo": "^4.0.1",
+    "terser": "^5.46.0",
+    "vite": "^7.3.1"
+  }
 }

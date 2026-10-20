@@ -1,52 +1,65 @@
-import { includeFromEvent, isMobile } from '../utils';
+import { includeFromEvent, isMobile, silencePromise } from '../utils'
 
 export default function clickInit(art, events) {
-    const {
-        constructor,
-        template: { $player, $video },
-    } = art;
+  const {
+    constructor,
+    template: { $player, $video },
+  } = art
 
-    events.proxy(document, ['click', 'contextmenu'], (event) => {
-        if (includeFromEvent(event, $player)) {
-            art.isInput = event.target.tagName === 'INPUT';
-            art.isFocus = true;
-            art.emit('focus', event);
-        } else {
-            art.isInput = false;
-            art.isFocus = false;
-            art.emit('blur', event);
+  function onDocumentClick(event) {
+    if (includeFromEvent(event, $player)) {
+      art.isInput = event.target.tagName === 'INPUT'
+      art.isFocus = true
+      art.emit('focus', event)
+    }
+    else {
+      art.isInput = false
+      art.isFocus = false
+      art.emit('blur', event)
+    }
+  }
+
+  art.on('document:click', onDocumentClick)
+  art.on('document:contextmenu', onDocumentClick)
+
+  let clickTimes = []
+  events.proxy($video, 'click', (event) => {
+    const now = Date.now()
+    clickTimes.push(now)
+    const { MOBILE_CLICK_PLAY, DBCLICK_TIME, MOBILE_DBCLICK_PLAY, DBCLICK_FULLSCREEN } = constructor
+
+    const clicks = clickTimes.filter(t => now - t <= DBCLICK_TIME)
+    switch (clicks.length) {
+      case 1:
+        art.emit('click', event)
+
+        if (isMobile) {
+          if (!art.isLock && MOBILE_CLICK_PLAY) {
+            silencePromise(art.toggle())
+          }
         }
-    });
-
-    let clickTime = 0;
-    events.proxy($video, 'click', (event) => {
-        const now = Date.now();
-        const { MOBILE_CLICK_PLAY, DBCLICK_TIME, MOBILE_DBCLICK_PLAY, DBCLICK_FULLSCREEN } = constructor;
-
-        if (now - clickTime <= DBCLICK_TIME) {
-            art.emit('dblclick', event);
-
-            if (isMobile) {
-                if (!art.isLock && MOBILE_DBCLICK_PLAY) {
-                    art.toggle();
-                }
-            } else {
-                if (DBCLICK_FULLSCREEN) {
-                    art.fullscreen = !art.fullscreen;
-                }
-            }
-        } else {
-            art.emit('click', event);
-
-            if (isMobile) {
-                if (!art.isLock && MOBILE_CLICK_PLAY) {
-                    art.toggle();
-                }
-            } else {
-                art.toggle();
-            }
+        else {
+          silencePromise(art.toggle())
         }
+        clickTimes = clicks
+        break
+      case 2:
+        art.emit('dblclick', event)
 
-        clickTime = now;
-    });
+        if (isMobile) {
+          if (!art.isLock && MOBILE_DBCLICK_PLAY) {
+            silencePromise(art.toggle())
+          }
+        }
+        else {
+          if (DBCLICK_FULLSCREEN) {
+            art.fullscreen = !art.fullscreen
+          }
+        }
+        clickTimes = []
+        break
+      default:
+        clickTimes = []
+    }
+  })
 }

@@ -1,42 +1,63 @@
-import { def } from '../utils';
+import { def, silencePromise } from '../utils'
 
 export default function switchMix(art) {
-    const { i18n, option, notice } = art;
+  function switchUrl(url, currentTime) {
+    return new Promise((resolve, reject) => {
+      if (url === art.url) {
+        resolve()
+        return
+      }
+      const { playing, aspectRatio, playbackRate } = art
 
-    function switchUrl(url, name, currentTime) {
-        return new Promise((resolve) => {
-            if (url === art.url) return resolve(url);
-            const { playing } = art;
-            art.pause();
-            URL.revokeObjectURL(art.url);
-            art.url = url;
-            art.once('video:canplay', () => {
-                art.playbackRate = false;
-                art.aspectRatio = false;
-                art.flip = 'normal';
-                art.autoSize = option.autoSize;
-                art.currentTime = currentTime;
-                art.notice.show = '';
-                if (playing) {
-                    art.play();
-                }
-                if (name) {
-                    notice.show = `${i18n.get('Switch Video')}: ${name}`;
-                }
-                resolve(url);
-            });
-        });
-    }
+      art.pause()
+      art.url = url
+      art.notice.show = ''
 
-    def(art, 'switchQuality', {
-        value: (url, name) => {
-            return switchUrl(url, name, art.currentTime);
-        },
-    });
+      const handlers = {}
 
-    def(art, 'switchUrl', {
-        value: (url, name) => {
-            return switchUrl(url, name, 0);
-        },
-    });
+      handlers.error = (error) => {
+        art.off('video:canplay', handlers.canplay)
+        art.off('video:loadedmetadata', handlers.metadata)
+        reject(error)
+      }
+
+      handlers.metadata = () => {
+        art.currentTime = currentTime
+      }
+
+      handlers.canplay = async () => {
+        art.off('video:error', handlers.error)
+        art.playbackRate = playbackRate
+        art.aspectRatio = aspectRatio
+
+        if (playing) {
+          await silencePromise(art.play())
+        }
+
+        art.notice.show = ''
+
+        resolve()
+      }
+
+      art.once('video:error', handlers.error)
+      art.once('video:loadedmetadata', handlers.metadata)
+      art.once('video:canplay', handlers.canplay)
+    })
+  }
+
+  def(art, 'switchQuality', {
+    value: (url) => {
+      return switchUrl(url, art.currentTime)
+    },
+  })
+
+  def(art, 'switchUrl', {
+    value: (url) => {
+      return switchUrl(url, 0)
+    },
+  })
+
+  def(art, 'switch', {
+    set: art.switchUrl,
+  })
 }

@@ -1,26 +1,14 @@
+import { addClass, removeClass } from '../utils'
+
 export default function miniProgressBar(art) {
-    art.on('ready', () => {
-        art.layers.add({
-            name: 'mini-progress-bar',
-            mounted($progressBar) {
-                art.on('destroy', () => {
-                    $progressBar.style.display = 'none';
-                });
+  art.on('control', (state) => {
+    if (state) {
+      removeClass(art.template.$player, 'art-mini-progress-bar')
+    }
+    else {
+      addClass(art.template.$player, 'art-mini-progress-bar')
+    }
+  })
 
-                art.on('video:timeupdate', () => {
-                    $progressBar.style.width = `${art.played * 100}%`;
-                });
-
-                art.on('setBar', (type, percentage) => {
-                    if (type === 'played') {
-                        $progressBar.style.width = `${percentage * 100}%`;
-                    }
-                });
-            },
-        });
-    });
-
-    return {
-        name: 'mini-progress-bar',
-    };
+  return { name: 'mini-progress-bar' }
 }

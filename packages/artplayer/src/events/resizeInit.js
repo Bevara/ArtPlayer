@@ -1,19 +1,23 @@
-import { throttle } from '../utils';
+import { debounce } from '../utils'
 
 export default function resizeInit(art, events) {
-    const { option } = art;
+  const { option, constructor } = art
 
-    const resizeFn = throttle(() => {
-        if (art.state === 'standard') {
-            art.autoSize = option.autoSize;
-        }
-        art.aspectRatioReset();
-        art.notice.show = '';
-        art.emit('resize');
-    }, art.constructor.RESIZE_TIME);
-
-    events.proxy(window, ['orientationchange', 'resize'], () => resizeFn());
-    if (screen && screen.orientation && screen.orientation.onchange) {
-        events.proxy(screen.orientation, 'change', () => resizeFn());
+  art.on('resize', () => {
+    const { aspectRatio, notice } = art
+    if (art.state === 'standard' && option.autoSize) {
+      art.autoSize()
     }
+    art.aspectRatio = aspectRatio
+    notice.show = ''
+  })
+
+  const resizeFn = debounce(() => art.emit('resize'), constructor.RESIZE_TIME)
+
+  art.on('window:orientationchange', () => resizeFn())
+  art.on('window:resize', () => resizeFn())
+
+  if (screen && screen.orientation && screen.orientation.onchange) {
+    events.proxy(screen.orientation, 'change', () => resizeFn())
+  }
 }

@@ -1,8 +1,8 @@
-# 编写插件
+# Writing Plugins
 
-但你已经知道播放器的`属性`, `方法`和`事件`后，再编写插件是非常简单的事
+Once you are familiar with the player's `properties`, `methods`, and `events`, writing a plugin becomes a very straightforward task.
 
-可以在实例化的时候加载插件的函数
+You can load a plugin function during instantiation.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -29,7 +29,7 @@ art.on('ready', () => {
 });
 ```
 
-可以在实例化之后再加载插件的函数
+You can also load a plugin function after instantiation.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -57,7 +57,7 @@ art.on('ready', () => {
 });
 ```
 
-例如我想写一个在视频暂停后，显示一个图片广告的插件
+For example, let's say I want to write a plugin that displays an image ad when the video is paused.
 
 <div className="run-code">▶ Run Code</div>
 

@@ -107,23 +107,6 @@ art.on('restart', (url) => {
 });
 ```
 
-## `loop`
-
-当出现区间循环时触发
-
-<div className="run-code">▶ Run Code</div>
-
-```js{6}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('loop', (start, end) => {
-    console.info('loop', start, end);
-});
-```
-
 ## `pause`
 
 当播放器暂停时触发
@@ -399,7 +382,7 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 
 art.on('autoHeight', (height) => {
@@ -459,6 +442,27 @@ var art = new Artplayer({
 
 art.on('fullscreen', (state) => {
     console.info('fullscreen', state);
+});
+```
+
+## `fullscreenError`
+
+当播放器发生窗口全屏错误时触发
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+	art.fullscreen = true;
+});
+
+art.on('fullscreenError', (event) => {
+    console.info('fullscreenError', event);
 });
 ```
 
@@ -576,9 +580,9 @@ art.on('subtitleOffset', (offset) => {
 });
 ```
 
-## `subtitleUpdate`
+## `subtitleBeforeUpdate`
 
-当字幕更新时触发
+当字幕更新前触发
 
 <div className="run-code">▶ Run Code</div>
 
@@ -591,8 +595,28 @@ var art = new Artplayer({
     },
 });
 
-art.on('subtitleUpdate', (text) => {
-    console.info('subtitleUpdate', text);
+art.on('subtitleBeforeUpdate', (cues) => {
+    console.info('subtitleBeforeUpdate', cues);
+});
+```
+
+## `subtitleAfterUpdate`
+
+当字幕更新后触发
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    subtitle: {
+        url: '/assets/sample/subtitle.srt',
+    },
+});
+
+art.on('subtitleAfterUpdate', (cues) => {
+    console.info('subtitleAfterUpdate', cues);
 });
 ```
 
@@ -611,32 +635,8 @@ var art = new Artplayer({
     },
 });
 
-art.on('subtitleLoad', (url) => {
-    console.info('subtitleLoad', url);
-});
-```
-
-## `subtitleSwitch`
-
-当字幕切换时触发
-
-<div className="run-code">▶ Run Code</div>
-
-```js{13}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-    subtitle: {
-        url: '/assets/sample/subtitle.srt',
-    },
-});
-
-art.on('ready', () => {
-    art.subtitle.url = '/assets/sample/subtitle.ass';
-});
-
-art.on('subtitleSwitch', (url) => {
-    console.info('subtitleSwitch', url);
+art.on('subtitleLoad', (option, cues) => {
+    console.info('subtitleLoad', cues, option);
 });
 ```
 
@@ -774,6 +774,40 @@ var art = new Artplayer({
 
 art.on('setting', (state) => {
     console.log(state);
+});
+```
+
+## `muted`
+
+当静音的状态变化时触发
+
+<div className="run-code">▶ Run Code</div>
+
+```js{6}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('muted', (state) => {
+    console.log(state);
+});
+```
+
+## `keydown`
+
+监听来自 `document` 的 `keydown` 事件
+
+<div className="run-code">▶ Run Code</div>
+
+```js{6}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('keydown', (event) => {
+    console.log(event.code);
 });
 ```
 

@@ -1,122 +1,132 @@
-import Artplayer = require('./artplayer');
+import type Artplayer from './artplayer'
 
-export type Selector = {
-    /**
-     * Whether the default is selected
-     */
-    default?: boolean;
+export interface Selector {
+  /**
+   * Whether the default is selected
+   */
+  default?: boolean
 
-    /**
-     * Html string of selector
-     */
-    html: string | HTMLElement;
-};
+  /**
+   * Html string of selector
+   */
+  html: string | HTMLElement
 
-export type Component = {
-    /**
-     * Component self-increasing id
-     */
-    readonly id: number;
+  /**
+   * Value of selector item
+   */
+  value?: string | number
 
-    /**
-     * Component parent name
-     */
-    readonly name: string | void;
+  /**
+   * Allow custom properties
+   */
+  [key: string]: any
+}
 
-    /**
-     * Component parent element
-     */
-    readonly $parent: HTMLElement | void;
+export interface Component {
+  /**
+   * Component self-increasing id
+   */
+  readonly id: number
 
-    /**
-     * Whether to show component parent
-     */
-    get show(): boolean;
+  /**
+   * Component parent name
+   */
+  readonly name: string | undefined
 
-    /**
-     * Whether to show component parent
-     */
-    set show(state: boolean);
+  /**
+   * Component parent element
+   */
+  readonly $parent: HTMLElement | undefined
 
-    /**
-     * Toggle the component parent
-     */
-    toggle(): void;
+  /**
+   * Whether to show component parent
+   */
+  get show(): boolean
 
-    /**
-     * Dynamic add a component
-     */
-    add(option: ComponentOption): HTMLElement;
+  /**
+   * Whether to show component parent
+   */
+  set show(state: boolean)
 
-    /**
-     * Dynamic remove a component by name
-     */
-    remove(name: string): void;
+  /**
+   * Toggle the component parent
+   */
+  toggle: () => void
 
-    /**
-     * Dynamic update a component
-     */
-    update(option: ComponentOption): HTMLElement;
-};
+  /**
+   * Dynamic add a component
+   */
+  add: (option: ComponentOption | ((art: Artplayer) => ComponentOption)) => HTMLElement | undefined
 
-export type ComponentOption = {
-    /**
-     * Html string or html element of component
-     */
-    html: string | HTMLElement;
+  /**
+   * Dynamic remove a component by name
+   */
+  remove: (name: string) => void
 
-    /**
-     * Whether to disable component
-     */
-    disable?: boolean;
+  /**
+   * Dynamic update a component
+   */
+  update: (option: ComponentOption) => HTMLElement | undefined
+}
 
-    /**
-     * Unique name for component
-     */
-    name?: string;
+export interface ComponentOption {
+  /**
+   * Html string or html element of component
+   */
+  html?: string | HTMLElement
 
-    /**
-     * Component sort index
-     */
-    index?: number;
+  /**
+   * Whether to disable component
+   */
+  disable?: boolean
 
-    /**
-     * Component style object
-     */
-    style?: Partial<CSSStyleDeclaration>;
+  /**
+   * Unique name for component
+   */
+  name?: string
 
-    /**
-     * Component click event
-     */
-    click?(this: Artplayer, component: Component, event: Event): void;
+  /**
+   * Component sort index
+   */
+  index?: number
 
-    /**
-     * When the component was mounted
-     */
-    mounted?(this: Artplayer, element: HTMLElement): void;
+  /**
+   * Component style object
+   */
+  style?: Partial<CSSStyleDeclaration>
 
-    /**
-     * When the component was before unmount
-     */
-    beforeUnmount?(this: Artplayer, element: HTMLElement): void;
+  /**
+   * Component click event
+   */
+  click?: (this: Artplayer, component: Component, event: Event) => void
 
-    /**
-     * Component tooltip, use in controls
-     */
-    tooltip?: string;
+  /**
+   * When the component was mounted
+   */
+  mounted?: (this: Artplayer, element: HTMLElement) => void
 
-    /**
-     * Component position, use in controls
-     */
-    position?: 'top' | 'left' | 'right' | (string & Record<never, never>);
+  /**
+   * When the component was before unmount
+   */
+  beforeUnmount?: (this: Artplayer, element: HTMLElement) => void
 
-    /**
-     * Custom selector list, use in controls
-     */
-    selector?: Selector[];
+  /**
+   * Component tooltip, use in controls
+   */
+  tooltip?: string
 
-    /**
-     * When selector item click, use in controls
-     */
-    onSelect?(this: Artplayer, selector: Selector, element: HTMLElement, event: Event): void;
-};
+  /**
+   * Component position, use in controls
+   */
+  position?: 'top' | 'left' | 'right' | (string & Record<never, never>)
+
+  /**
+   * Custom selector list, use in controls
+   */
+  selector?: Selector[]
+
+  /**
+   * When selector item click, use in controls
+   */
+  onSelect?: (this: Artplayer, selector: Selector, element: HTMLElement, event: Event) => void
+}

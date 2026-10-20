@@ -1,8 +1,8 @@
-# 设置面板
+# Settings Panel
 
-## 内置
+## Built-in
 
-需先打开设置面板，然后自带四个内置项：`flip`, `playbackRate`, `aspectRatio`, `subtitleOffset`
+First, you need to open the settings panel. It comes with four built-in items: `flip`, `playbackRate`, `aspectRatio`, `subtitleOffset`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -10,7 +10,7 @@
 var art = new Artplayer({
     container: '.artplayer-app',
     url: '/assets/sample/video.mp4',
-	setting: true,
+    setting: true,
     flip: true,
     playbackRate: true,
     aspectRatio: true,
@@ -18,17 +18,47 @@ var art = new Artplayer({
 });
 ```
 
+## Create - Button
 
-## 创建 - 选择列表
+| Property   | Type                | Description          |
+| ---------- | ------------------- | -------------------- |
+| `html`     | `String`, `Element` | The DOM element      |
+| `icon`     | `String`, `Element` | The icon element     |
+| `onClick`  | `Function`          | The click event      |
+| `width`    | `Number`            | The list width       |
+| `tooltip`  | `String`            | The tooltip text     |
 
-| 属性       | 类型                | 描述         |
-| ---------- | ------------------- | ------------ |
-| `html`     | `String`, `Element` | 元素的 DOM   |
-| `icon`     | `String`, `Element` | 元素的图标   |
-| `selector` | `Array`             | 元素列表     |
-| `onSelect` | `Function`          | 元素点击事件 |
-| `width`    | `Number`            | 列表宽度     |
-| `tooltip`  | `String`            | 提示文本     |
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    setting: true,
+    settings: [
+        {
+            html: 'Button',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
+            tooltip: 'tooltip',
+            onClick(item, $dom, event) {
+                console.info(item, $dom, event);
+                return 'new tooltip';
+            },
+        },
+    ],
+});
+```
+
+## Create - Selection List
+
+| Property   | Type                | Description          |
+| ---------- | ------------------- | -------------------- |
+| `html`     | `String`, `Element` | The DOM element      |
+| `icon`     | `String`, `Element` | The icon element     |
+| `selector` | `Array`             | The list of elements |
+| `onSelect` | `Function`          | The click event      |
+| `width`    | `Number`            | The list width       |
+| `tooltip`  | `String`            | The tooltip text     |
 
 <div className="run-code">▶ Run Code</div>
 
@@ -88,7 +118,7 @@ var art = new Artplayer({
 });
 ```
 
-## 创建 - 列表嵌套
+## Create - Nested List
 
 <div className="run-code">▶ Run Code</div>
 
@@ -137,17 +167,18 @@ var art = new Artplayer({
         },
     ],
 });
+
 ```
 
-## 创建 - 切换按钮
+## Create - Toggle Button
 
-| 属性       | 类型                | 描述            |
-| ---------- | ------------------- | --------------- |
-| `html`     | `String`, `Element` | 元素的 DOM 元素 |
-| `icon`     | `String`, `Element` | 元素的图标      |
-| `switch`   | `Boolean`           | 按钮默认状态    |
-| `onSwitch` | `Function`          | 按钮切换事件    |
-| `tooltip`  | `String`            | 提示文本        |
+| Property   | Type                | Description                |
+| ---------- | ------------------- | -------------------------- |
+| `html`     | `String`, `Element` | DOM element for the item   |
+| `icon`     | `String`, `Element` | Icon for the item          |
+| `switch`   | `Boolean`           | Default state of the button |
+| `onSwitch` | `Function`          | Button toggle event        |
+| `tooltip`  | `String`            | Tooltip text               |
 
 <div className="run-code">▶ Run Code</div>
 
@@ -160,7 +191,7 @@ var art = new Artplayer({
         {
             html: 'PIP Mode',
             tooltip: 'Close',
-            icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
             switch: false,
             onSwitch: function (item, $dom, event) {
                 console.info(item, $dom, event);
@@ -174,16 +205,16 @@ var art = new Artplayer({
 });
 ```
 
-## 创建 - 范围滑块
+## Create - Range Slider
 
-| 属性       | 类型                | 描述             |
-| ---------- | ------------------- | ---------------- |
-| `html`     | `String`, `Element` | 元素的 DOM 元素  |
-| `icon`     | `String`, `Element` | 元素的图标       |
-| `range`    | `Array`             | 默认状态数组     |
-| `onRange`  | `Function`          | 完成时触发的事件 |
-| `onChange` | `Function`          | 变化时触发的事件 |
-| `tooltip`  | `String`            | 提示文本         |
+| Property   | Type                | Description                |
+| ---------- | ------------------- | -------------------------- |
+| `html`     | `String`, `Element` | DOM element for the item   |
+| `icon`     | `String`, `Element` | Icon for the item          |
+| `range`    | `Array`             | Default state array        |
+| `onRange`  | `Function`          | Event triggered on completion |
+| `onChange` | `Function`          | Event triggered on change  |
+| `tooltip`  | `String`            | Tooltip text               |
 
 ```js
 const range = [5, 1, 10, 1];
@@ -204,18 +235,18 @@ var art = new Artplayer({
         {
             html: 'Slider',
             tooltip: '5x',
-            icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
             range: [5, 1, 10, 1],
             onChange: function (item, $dom, event) {
                 console.info(item, $dom, event);
-                return item.range + 'x';
+                return item.range[0] + 'x';
             },
         },
     ],
 });
 ```
 
-## 添加
+## Add
 
 <div className="run-code">▶ Run Code</div>
 
@@ -231,12 +262,12 @@ art.setting.show = true;
 art.setting.add({
     html: 'Slider',
     tooltip: '5x',
-    icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+    icon: '<img width="22" height="22" src="/assets/img/state.svg">',
     range: [5, 1, 10, 1],
 });
 ```
 
-## 删除
+## Remove
 
 <div className="run-code">▶ Run Code</div>
 
@@ -251,7 +282,7 @@ var art = new Artplayer({
             name: 'slider',
             html: 'Slider',
             tooltip: '5x',
-            icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
             range: [5, 1, 10, 1],
         },
     ],
@@ -267,7 +298,7 @@ art.on('ready', () => {
 });
 ```
 
-## 更新
+## Update
 
 <div className="run-code">▶ Run Code</div>
 
@@ -281,7 +312,7 @@ var art = new Artplayer({
             name: 'slider',
             html: 'Slider',
             tooltip: '5x',
-            icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
             range: [5, 1, 10, 1],
         },
     ],
@@ -296,7 +327,7 @@ art.on('ready', () => {
             name: 'slider',
             html: 'PIP Mode',
             tooltip: 'Close',
-            icon: '<img width="22" heigth="22" src="/assets/img/state.svg">',
+            icon: '<img width="22" height="22" src="/assets/img/state.svg">',
             switch: false,
         });
     }, 3000);

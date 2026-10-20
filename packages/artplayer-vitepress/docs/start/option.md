@@ -155,24 +155,6 @@ var art = new Artplayer({
 });
 ```
 
-## `title`
-
--   Type: `String`
--   Default: `''`
-
-视频标题，目前会出现在 `视频截图` 和 `迷你模式` 下
-
-<div className="run-code">▶ Run Code</div>
-
-```js{4}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-    title: 'your-video-title',
-    screenshot: true,
-});
-```
-
 ## `theme`
 
 -   Type: `String`
@@ -481,6 +463,23 @@ var art = new Artplayer({
 });
 ```
 
+## `backdrop`
+
+-   Type: `Boolean`
+-   Default: `true`
+
+是否开启播放器 UI 的背景虚化效果。开启后，设置面板、右键菜单、音量条等浮层会应用 `backdrop-filter` 毛玻璃效果，看起来更通透，但在部分低性能设备或老旧浏览器上可能会有性能或兼容性问题。
+
+<div className="run-code">▶ Run Code</div>
+
+```js{4}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    backdrop: false, // 关闭毛玻璃效果
+});
+```
+
 ## `fullscreen`
 
 -   Type: `Boolean`
@@ -714,7 +713,7 @@ var art = new Artplayer({
 
 :::warning `组件配置` 请参考以下地址：
 
-[/component/contextmenu.html](/component/contextmenu.html)-   Type:
+[/component/contextmenu.html](/component/contextmenu.html)
 
 :::
 
@@ -857,35 +856,6 @@ var art = new Artplayer({
 });
 ```
 
-## `whitelist`
-
--   Type: `Array`
--   Default: `[]`
-
-因为不同的移动设备存在多种差异和限制，有时候你希望在某些移动设备上不使用本播放器，而是直接使用原生的功能时，可以通过该选项控制
-
-白名单是一个数组类型，分别与 `window.navigator.userAgent` 进行匹配，只要其中一项匹配成功则启用播放器
-
-支持 `字符串` 匹配,  `函数` 匹配,  `正则` 匹配
-
-<div className="run-code">▶ Run Code</div>
-
-```js{4}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-    whitelist: [(ua) => /iPhone/gi.test(ua)],
-    // whitelist: [/iPhone/gi],
-    // whitelist: ['iPhone'],
-});
-```
-
-:::warning 提示
-
-假如该选项不填，则默认使用本播放器
-
-:::
-
 ## `thumbnails`
 
 -   Type: `Object`
@@ -900,6 +870,7 @@ var art = new Artplayer({
 | `column` | `Number` | 预览图列数 |
 | `width`  | `Number` | 预览图宽度 |
 | `height` | `Number` | 预览图高度 |
+| `scale`  | `Number` | 预览图缩放 |
 
 <div className="run-code">▶ Run Code</div>
 
@@ -909,7 +880,7 @@ var art = new Artplayer({
     url: '/assets/sample/video.mp4',
     thumbnails: {
         url: '/assets/sample/thumbnails.png',
-        number: 100,
+        number: 60,
         column: 10,
     },
 });
@@ -930,6 +901,7 @@ var art = new Artplayer({
 
 | 属性        | 类型       | 描述                                |
 | ----------- | ---------- | ----------------------------------- |
+| `name`      | `String`   | 字幕名字                            |
 | `url`       | `String`   | 字幕地址                            |
 | `type`      | `String`   | 字幕类型，可选 `vtt`, `srt`, `ass`  |
 | `style`     | `Object`   | 字幕样式                            |
@@ -959,7 +931,7 @@ var art = new Artplayer({
 ## `moreVideoAttr`
 
 -   Type: `Object`
--   Default: `{'controls': false,'preload': 'metadata'}`
+-   Default: `{'controls': false, 'preload': 'metadata'}`（Safari 中会自动调整为 `preload: 'auto'` 以提升加载体验）
 
 更多视频属性，这些属性将直接写入视频元素里
 
@@ -1059,7 +1031,7 @@ var art = new Artplayer({
 -   Type: `String`
 -   Default: `navigator.language.toLowerCase()`
 
-默认显示语言，目前支持：`en`, `zh-cn`, `zh-tw`, `cs`, `pl`, `es`, `fa`, `fr`, `id`
+默认显示语言，目前支持：`en`, `zh-cn`
 
 <div className="run-code">▶ Run Code</div>
 
@@ -1070,6 +1042,12 @@ var art = new Artplayer({
     lang: 'en',
 });
 ```
+
+:::warning 更多的语言设置
+
+[/start/i18n.html](/start/i18n.html)
+
+:::
 
 ## `i18n`
 
@@ -1114,9 +1092,9 @@ var art = new Artplayer({
 });
 ```
 
-:::warning i18n 写法参考
+:::warning 更多的语言设置
 
-[artplayer/types/i18n.d.ts](https://github.com/zhw2590582/ArtPlayer/blob/master/packages/artplayer/types/i18n.d.ts)
+[/start/i18n.html](/start/i18n.html)
 
 :::
 
@@ -1134,6 +1112,23 @@ var art = new Artplayer({
     container: '.artplayer-app',
     url: '/assets/sample/video.mp4',
     lock: true,
+});
+```
+
+## `gesture`
+
+-   Type: `Boolean`
+-   Default: `true`
+
+是否在移动端启用视频元素上的手势事件
+
+<div className="run-code">▶ Run Code</div>
+
+```js{4}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    gesture: false,
 });
 ```
 
@@ -1235,6 +1230,23 @@ var art = new Artplayer({
 
 :::warning cssVar 写法参考
 
-[artplayer/types/cssVar.d.d.ts](https://github.com/zhw2590582/ArtPlayer/blob/master/packages/artplayer/types/cssVar.d.ts)
+[artplayer/types/cssVar.d.ts](https://github.com/zhw2590582/ArtPlayer/blob/master/packages/artplayer/types/cssVar.d.ts)
 
 :::
+
+## `proxy`
+
+-   Type: `function`
+-   Default: `undefined`
+
+函数可以返回一个第三方的 `HTMLCanvasElement` 或者 `HTMLVideoElement`，例如可以代理一个已经存在的 `video` dom元素
+
+<div className="run-code">▶ Run Code</div>
+
+```js{4}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+    proxy: () => document.createElement('video')
+});
+```

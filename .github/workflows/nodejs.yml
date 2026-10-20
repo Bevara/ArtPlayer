@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'dist/**'
-      - 'images/**'
 
 jobs:
   build:
@@ -17,19 +12,32 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [20.x]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install, lint, build, and test
-      run: |
-        npm install
-        npm run lint
-        npm run build:all
-        npm run test
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install, lint, build, and test
+        run: |
+          yarn
+          yarn test:playback
+          yarn lint
+          yarn build:all
+          yarn test:dash-control
+        env:
+          CI: true
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -f docs
+          git commit -m 'Deploy to GitHub Pages'
+          git subtree split --prefix docs master -b gh-pages-temp
+          git push origin gh-pages-temp:refs/heads/gh-pages --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

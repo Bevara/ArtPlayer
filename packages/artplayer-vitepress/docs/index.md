@@ -16,6 +16,10 @@ yarn add artplayer
 pnpm add artplayer
 ```
 
+```bash [bun]
+bun add artplayer
+```
+
 ```html [script]
 <script src="path/to/artplayer.js"></script>
 ```
@@ -40,15 +44,6 @@ https://unpkg.com/artplayer/dist/artplayer.js
 
 ::: code-group
 
-```js [index.js]
-import Artplayer from 'artplayer';
-
-const art = new Artplayer({
-    container: '.artplayer-app',
-    url: 'path/to/video.mp4',
-});
-```
-
 ```html [index.html]
 <html>
     <head>
@@ -63,11 +58,18 @@ const art = new Artplayer({
     </head>
     <body>
         <div class="artplayer-app"></div>
+        <script src="path/to/artplayer.js"></script>
+        <script>
+          const art = new Artplayer({
+              container: '.artplayer-app',
+              url: 'path/to/video.mp4',
+          });
+        </script>
     </body>
 </html>
 ```
 
-::: 
+:::
 
 ::: warning 提示
 
@@ -77,7 +79,7 @@ const art = new Artplayer({
 
 ::: tip 以下链接可以看到更多的使用例子
 
-[/packages/artplayer-template](https://github.com/zhw2590582/ArtPlayer/tree/master/packages/artplayer-template)
+[/example](https://github.com/zhw2590582/ArtPlayer/tree/master/example)
 
 :::
 
@@ -87,73 +89,61 @@ const art = new Artplayer({
 
 ```vue [Artplayer.vue]
 <template>
-  <div ref="artRef"></div>
+  <div ref="$container" />
 </template>
 
-<script>
-import Artplayer from "artplayer";
+<script setup>
+import Artplayer from 'artplayer'
+import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 
-export default {
-  data() {
-    return {
-      instance: null,
-    };
+const props = defineProps({
+  option: {
+    type: Object,
+    required: true,
   },
-  props: {
-    option: {
-      type: Object,
-      required: true,
-    },
-  },
-  mounted() {
-    this.instance = new Artplayer({
-      ...this.option,
-      container: this.$refs.artRef,
-    });
+})
 
-    this.$nextTick(() => {
-      this.$emit("get-instance", this.instance);
-    });
-  },
-  beforeDestroy() {
-    if (this.instance && this.instance.destroy) {
-      this.instance.destroy(false);
-    }
-  },
-};
+const emit = defineEmits(['getInstance'])
+
+const art = shallowRef(null)
+const $container = ref(null)
+
+onMounted(() => {
+  art.value = new Artplayer({
+    ...props.option,
+    container: $container.value,
+  })
+  emit('getInstance', art.value)
+})
+
+onBeforeUnmount(() => {
+  art.value.destroy(false)
+})
 </script>
 ```
 
 ```vue [app.vue]
 <template>
-  <Artplayer @get-instance="getInstance" :option="option" :style="style" />
+  <Artplayer :option="option" :style="style" @get-instance="getInstance" />
 </template>
 
-<script>
-import Artplayer from "./Artplayer.vue";
+<script setup>
+import { reactive } from 'vue'
+import Artplayer from './Artplayer.vue'
 
-export default {
-  data() {
-    return {
-      option: {
-        url: "path/to/video.mp4",
-      },
-      style: {
-        width: "600px",
-        height: "400px",
-        margin: "60px auto 0",
-      },
-    };
-  },
-  components: {
-    Artplayer,
-  },
-  methods: {
-    getInstance(art) {
-      console.info(art);
-    },
-  },
-};
+const option = reactive({
+  url: 'path/to/video.mp4',
+})
+
+const style = reactive({
+  width: '600px',
+  height: '400px',
+  margin: '60px auto 0',
+})
+
+function getInstance(art) {
+  console.log(art)
+}
 </script>
 ```
 
@@ -170,56 +160,51 @@ export default {
 ::: code-group
 
 ```jsx [Artplayer.jsx]
-import { useEffect, useRef } from 'react';
-import Artplayer from 'artplayer';
+import Artplayer from 'artplayer'
+import { useEffect, useRef } from 'react'
 
 export default function Player({ option, getInstance, ...rest }) {
-    const artRef = useRef();
+  const $container = useRef()
 
-    useEffect(() => {
-        const art = new Artplayer({
-            ...option,
-            container: artRef.current,
-        });
+  useEffect(() => {
+    const art = new Artplayer({
+      ...option,
+      container: $container.current,
+    })
 
-        if (getInstance && typeof getInstance === 'function') {
-            getInstance(art);
-        }
+    if (typeof getInstance === 'function') {
+      getInstance(art)
+    }
 
-        return () => {
-            if (art && art.destroy) {
-                art.destroy(false);
-            }
-        };
-    }, []);
+    return () => art.destroy(false)
+  }, [])
 
-    return <div ref={artRef} {...rest}></div>;
+  return <div ref={$container} {...rest}></div>
 }
 ```
 
 ```jsx [app.jsx]
-import React from 'react';
-import Artplayer from './ArtPlayer.jsx';
+import Artplayer from './Artplayer.jsx'
 
 function App() {
-    return (
-        <div>
-            <Artplayer
-                option={{
-                    url: 'https://artplayer.org/assets/sample/video.mp4',
-                }}
-                style={{
-                    width: '600px',
-                    height: '400px',
-                    margin: '60px auto 0',
-                }}
-                getInstance={(art) => console.info(art)}
-            />
-        </div>
-    );
+  return (
+    <div>
+      <Artplayer
+        option={{
+          url: 'path/to/video.mp4',
+        }}
+        style={{
+          width: '600px',
+          height: '400px',
+          margin: '60px auto 0',
+        }}
+        getInstance={art => console.log(art)}
+      />
+    </div>
+  )
 }
 
-export default App;
+export default App
 ```
 
 :::
@@ -230,13 +215,58 @@ export default App;
 
 :::
 
-## 语法提示
+## TypeScript
 
-有时你的 `js` 文件会丢失 `TypeScript` 的类型提示，这时候你可以手动导入类型 
+导入 `Artplayer` 时会自动导入的 `artplayer.d.ts`
+
+### Vue.js
+
+```vue{3}
+<script setup>
+import Artplayer from 'artplayer';
+const art = shallowRef<Artplayer>(null);
+art.value = new Artplayer();
+</script>
+```
+
+### React.js
+
+```jsx{2}
+import Artplayer from 'artplayer';
+const art = useRef<Artplayer>(null);
+art.current = new Artplayer();
+```
+
+### Option
+
+你也可以使用选项的类型
+
+```ts{3}
+import Artplayer, { type Option } from 'artplayer';
+
+const option: Option = {
+    container: '.artplayer-app',
+    url: './assets/sample/video.mp4',
+};
+
+option.volume = 0.5;
+
+const art = new Artplayer(option);
+```
+
+::: tip 全部 TypeScript 定义
+
+[packages/artplayer/types](https://github.com/zhw2590582/ArtPlayer/tree/master/packages/artplayer/types)
+
+:::
+
+## JavaScript
+
+有时你的 `js` 文件会丢失 `TypeScript` 的类型提示，这时候你可以手动导入类型
 
 变量：
 
-```js
+```js{1-3}
 /**
  * @type {import("artplayer")}
  */
@@ -245,7 +275,7 @@ let art = null;
 
 参数：
 
-```js
+```js{1-3}
 /**
  * @param {import("artplayer")} art
  */
@@ -256,7 +286,7 @@ function getInstance(art) {
 
 属性：
 
-```js
+```js{4-6}
 export default {
   data() {
     return {
@@ -269,6 +299,23 @@ export default {
 }
 ```
 
+选项：
+
+```js{1-3}
+/**
+ * @type {import("artplayer/types/option").Option}
+ */
+
+const option = {
+    container: '.artplayer-app',
+    url: './assets/sample/video.mp4',
+};
+
+option.volume = 0.5;
+
+const art8 = new Artplayer(option);
+```
+
 ## 古老的浏览器
 
 生产构建的 `artplayer.js` 只兼容最新一个主版本的 `Chrome`：`last 1 Chrome version`
@@ -276,7 +323,7 @@ export default {
 对于古老的浏览器，可以使用 `artplayer.legacy.js` 文件，可以兼容到：`IE 11`
 
 ```js
-import Artplayer from 'artplayer/dist/artplayer.legacy.js';
+import Artplayer from 'artplayer/legacy'
 ```
 
 ::: code-group
@@ -291,8 +338,98 @@ https://unpkg.com/artplayer/dist/artplayer.legacy.js
 
 :::
 
-假如你要兼容更古老的浏览器时，请修改以下配置然后自行构建：
+::: tip 假如你要兼容更古老的浏览器时，请修改以下配置然后自行构建：
 
 构建配置：[scripts/build.js](https://github.com/zhw2590582/ArtPlayer/blob/master/scripts/build.js#L29)
 
 参考文档：[browserslist](https://github.com/browserslist/browserslist#full-list)
+
+:::
+
+## ECMAScript Module
+
+::: tip ESM Demo:
+
+[https://artplayer.org/esm.html](https://artplayer.org/esm.html)
+
+:::
+
+从 `5.2.6` 开始，`artplayer` 和所有插件还会提供一个 `ESM` 版本的 `mjs`，如：
+
+- `artplayer/dist/artplayer.mjs`
+- `artplayer-plugin-danmuku/dist/artplayer-plugin-danmuku.mjs`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ArtPlayer ESM with Import Map</title>
+    <style>
+        #player {
+            width: 640px;
+            height: 360px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "artplayer": "https://unpkg.com/artplayer/dist/artplayer.esm.js"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div id="player"></div>
+    <script type="module">
+        import Artplayer from 'artplayer';
+
+        const art = new Artplayer({
+            container: '#player',
+            url: '/assets/sample/video.mp4',
+        });
+    </script>
+</body>
+
+</html>
+```
+
+## 自定义 userAgent
+
+目前对于是否移动设备的判断并不准确，有时候希望通过改变 `userAgent` 来调整播放器的UI, 所以在 `5.2.4` 开始新增了一个 `globalThis.CUSTOM_USER_AGENT` 全局变量。
+
+```html
+<html>
+    <head>
+        <title>ArtPlayer Demo</title>
+        <meta charset="UTF-8" />
+        <style>
+            .artplayer-app {
+                width: 400px;
+                height: 300px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="artplayer-app"></div>
+        <script>globalThis.CUSTOM_USER_AGENT = 'iphone'</script>
+        <script src="path/to/artplayer.js"></script>
+        <script>
+          const art = new Artplayer({
+              container: '.artplayer-app',
+              url: 'path/to/video.mp4',
+          });
+        </script>
+    </body>
+</html>
+```
+
+::: warning 提示
+
+你需要在引入 `Artplayer` 依赖前来修改它才会生效
+
+:::

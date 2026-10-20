@@ -1,12 +1,12 @@
-# Instance Property
+# Instance Properties
 
-The `Instance Property` here refers to the `Primary Property` attached to the `Instance`, which is more commonly used
+Here, `Instance Properties` refer to the `first-level properties` mounted on the `instance`, which are commonly used.
 
 ## `play`
 
 -   Type: `Function`
 
-Play video
+Play the video.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -26,7 +26,7 @@ art.on('ready', () => {
 
 -   Type: `Function`
 
-Pause video
+Pause the video.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -50,7 +50,7 @@ art.on('ready', () => {
 
 -   Type: `Function`
 
-Toggle video playback and pause
+Toggle video play and pause.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -75,7 +75,7 @@ art.on('ready', () => {
 -   Type: `Function`
 -   Parameter: `Boolean`
 
-To destroy the player, accept a parameter indicating whether to remove the player's html after destruction. The default value is `true`
+Destroy the player. Accepts a parameter indicating whether to also remove the player's `html` after destruction. Defaults to `true`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -90,12 +90,34 @@ art.on('ready', () => {
 });
 ```
 
+## `reset`
+
+-   Type: `Function`
+
+Reset the player's video element: removes the current `src` and calls `load()` once. Commonly used to manually release media resources or reinitialize the video tag in single-page applications.
+
+> Note: The global configuration `Artplayer.REMOVE_SRC_WHEN_DESTROY` will also automatically execute similar logic when `destroy()` is called.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    // Only reset the video, do not remove the interface
+    art.reset();
+});
+```
+
 ## `seek`
 
 -   Type: `Setter`
 -   Parameter: `Number`
 
-Video time jump in seconds
+Seek to a specific time in the video, in seconds.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -115,7 +137,7 @@ art.on('ready', () => {
 -   Type: `Setter`
 -   Parameter: `Number`
 
-Video time fast forward in seconds
+Fast-forward the video time, in seconds.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -135,7 +157,7 @@ art.on('ready', () => {
 -   Type: `Setter`
 -   Parameter: `Number`
 
-Video time rewind in seconds
+Rewind the video time, in seconds.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -159,7 +181,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Number`
 
-Set and get video volume, range: `[0, 1]`
+Set and get the video volume, range: `[0, 1]`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -181,7 +203,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Set and get video url
+Set and get the video URL.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -196,14 +218,12 @@ art.on('ready', () => {
 });
 ```
 
-## `switchUrl`
+## `switch`
 
--   Type: `Function`
+-   Type: `Setter`
 -   Parameter: `String`
 
-Setting the video url is similar to that of `url`, but some optimization operations will be performed
-
-The function supports two parameters, the first is the new video url, and the second is the optional new video name
+Set the video URL. Similar to `art.url` when setting, but performs some optimization operations.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -216,19 +236,47 @@ var art = new Artplayer({
 art.on('ready', () => {
     art.seek = 10;
     setTimeout(() => {
-        art.switchUrl('/assets/sample/video.mp4?t=0', 'New Video Name');
+        art.switch = '/assets/sample/video.mp4?t=0';
     }, 3000);
 });
 ```
+
+## `switchUrl`
+
+-   Type: `Function`
+-   Parameter: `String`
+
+Set the video URL. Similar to `art.url` when setting, but performs some optimization operations.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{9}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.seek = 10;
+    setTimeout(() => {
+        art.switchUrl('/assets/sample/video.mp4?t=0');
+    }, 3000);
+});
+
+```
+
+:::warning Note
+
+`art.switch` and `art.switchUrl` have the same functionality, but the `art.switchUrl` method returns a `Promise`. It `resolve`s when the new URL is playable and `reject`s when the new URL fails to load.
+
+:::
 
 ## `switchQuality`
 
 -   Type: `Function`
 -   Parameter: `String`
 
-Set the video quality address, similar to `switchUrl`, but with the previous playback progress
-
-The function supports two parameters, the first is the new video url, and the second is the optional new video name
+Sets the video quality URL. Similar to `art.switchUrl`, but retains the previous playback progress.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -241,7 +289,7 @@ var art = new Artplayer({
 art.on('ready', () => {
     art.seek = 10;
     setTimeout(() => {
-        art.switchQuality('/assets/sample/video.mp4?t=0', 'New Video Name');
+        art.switchQuality('/assets/sample/video.mp4?t=0');
     }, 3000);
 });
 ```
@@ -251,7 +299,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Boolean`
 
-Set and get whether the video is muted
+Sets or gets whether the video is muted.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -273,7 +321,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Number`
 
-Set and get the current time of the video. Setting the time is similar to `seek`, but it will not trigger additional events
+Sets or gets the current playback time of the video. Setting the time is similar to `seek`, but it does not trigger additional events.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -294,7 +342,7 @@ art.on('ready', () => {
 
 -   Type: `Getter`
 
-Get video duration
+Gets the duration of the video.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -309,9 +357,9 @@ art.on('ready', () => {
 });
 ```
 
-:::warning Tip
+:::warning Note
 
-Some videos have no duration, such as live videos or videos that have not been decoded. The duration obtained at this time will be `0`
+Some videos may not have a duration, such as live streams or videos that have not been fully decoded. In such cases, the obtained duration will be `0`.
 
 :::
 
@@ -319,7 +367,7 @@ Some videos have no duration, such as live videos or videos that have not been d
 
 -   Type: `Function`
 
-Download a screenshot of the current video frame
+Downloads a screenshot of the current video frame. An optional parameter specifies the screenshot filename.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -330,7 +378,7 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.screenshot();
+    art.screenshot('your-name');
 });
 ```
 
@@ -338,7 +386,7 @@ art.on('ready', () => {
 
 -   Type: `Function`
 
-Get the `base64` address of the screenshot of the current video frame, and return a `Promise`
+Gets the `base64` URL of a screenshot of the current video frame. Returns a `Promise`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -358,7 +406,7 @@ art.on('ready', async () => {
 
 -   Type: `Function`
 
-Get the `blob` address of the screenshot of the current video frame, and return a `Promise`
+Gets the `blob` URL of a screenshot of the current video frame. Returns a `Promise`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -379,7 +427,7 @@ art.on('ready', async () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Boolean`
 
-Set and get full screen of player window
+Sets or gets the player's window fullscreen state.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -399,9 +447,9 @@ var art = new Artplayer({
 });
 ```
 
-:::warning Tip
+:::warning Note
 
-Due to the browser security mechanism, the page must have interaction before triggering the full screen of the window (for example, the user has clicked on the page)
+Due to browser security mechanisms, a user interaction (e.g., a click on the page) must occur before triggering window fullscreen.
 
 :::
 
@@ -410,7 +458,7 @@ Due to the browser security mechanism, the page must have interaction before tri
 -   Type: `Setter/Getter`
 -   Parameter: `Boolean`
 
-Set and get full screen of player web page
+Sets or gets the player's web page fullscreen state.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -435,7 +483,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Boolean`
 
-Set and get the picture-in-picture mode of the player
+Sets or gets the player's Picture-in-Picture (PIP) mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -455,9 +503,9 @@ var art = new Artplayer({
 });
 ```
 
-:::warning Tip
+:::warning Note
 
-Due to the browser security mechanism, before triggering picture-in-picture, the page must have interaction (for example, the user has clicked on the page)
+Due to browser security mechanisms, a user interaction (e.g., a click on the page) must occur before triggering Picture-in-Picture.
 
 :::
 
@@ -466,7 +514,7 @@ Due to the browser security mechanism, before triggering picture-in-picture, the
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Set and obtain video posters. You can only see the poster effect before the video is played
+Sets and gets the video poster. The poster effect is only visible before the video starts playing.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -489,7 +537,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Boolean`
 
-Set and get player mini mode
+Sets and gets the player's mini mode.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -509,7 +557,7 @@ art.on('ready', () => {
 -   Type: `Getter`
 -   Parameter: `Boolean`
 
-Get whether the video is playing
+Gets whether the video is currently playing.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -525,12 +573,12 @@ art.on('ready', () => {
 });
 ```
 
-## `autoSize`
+## `state`
 
 -   Type: `Setter/Getter`
--   Parameter: `Boolean`
+-   Parameter: `String`
 
-Set whether the video is adaptive size. After setting it to `true`, it will only be executed once
+Gets or sets the player's current state. Supported values: `standard` (normal), `mini` (mini window), `pip` (picture-in-picture), `fullscreen` (window fullscreen), `fullscreenWeb` (webpage fullscreen).
 
 <div className="run-code">▶ Run Code</div>
 
@@ -541,9 +589,27 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    console.info(art.autoSize);
-    art.autoSize = true;
-    console.info(art.autoSize);
+    console.info(art.state); // Default is 'standard'
+    art.state = 'mini';
+});
+```
+
+## `autoSize`
+
+-   Type: `Function`
+
+Sets whether the video adapts its size automatically.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{8}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.autoSize();
 });
 ```
 
@@ -551,7 +617,7 @@ art.on('ready', () => {
 
 -   Type: `Getter`
 
-Get the size and coordinate information of the player
+Gets the player's dimensions and coordinate information.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -566,18 +632,40 @@ art.on('ready', () => {
 });
 ```
 
-:::warning Tip
+:::warning Note
 
-Dimension and coordinate information are obtained through `getBoundingClientRect`
+The dimension and coordinate information is obtained via `getBoundingClientRect`.
 
 :::
+
+## `bottom` / `top` / `left` / `right` / `x` / `y` / `width` / `height`
+
+-   Type: `Getter`
+
+These properties provide quick access to `rect`:
+
+- `bottom`, `top`, `left`, `right`, `x`, `y`: Correspond to the fields of the same name in `DOMRect`.
+- `width`, `height`: The player's current visible width and height.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{7}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    console.info(art.width, art.height, art.left, art.top);
+});
+```
 
 ## `flip`
 
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Set and get player rollover, support `normal`,  `horizontal`,  `vertical`
+Sets and gets the player's flip state. Supported values: `normal`, `horizontal`, `vertical`.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -599,7 +687,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `Number`
 
-Set and get player playback speed
+Sets and gets the player's playback speed.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -621,7 +709,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Set and obtain the player aspect ratio
+Sets and gets the player's aspect ratio.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -638,42 +726,11 @@ art.on('ready', () => {
 });
 ```
 
-## `loop`
-
--   Type: `Setter/Getter`
--   Parameter: `Array`
-
-Set and obtain interval sequential playback in seconds
-
-<div className="run-code">▶ Run Code</div>
-
-```js{8}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('ready', () => {
-    console.info(art.loop);
-    art.loop = [5, 10];
-    console.info(art.loop);
-});
-```
-
-:::warning Tip
-
-To delete interval looping, just set `loop` to `[]`
-
-`art.loop` and `art.option.loop` aer two different things, please don't mix them up
-
-:::
-
 ## `autoHeight`
 
--   Type: `Setter/Getter`
--   Parameter: `Boolean`
+-   Type: `Function`
 
-When the container has only width, this attribute can automatically calculate and set the height of the video. After it is set to `true`, it will only be executed once
+When the container only has a defined width, this property can automatically calculate and set the video's height.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -684,17 +741,17 @@ var art = new Artplayer({
 });
 
 art.on('ready', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 
 art.on('resize', () => {
-    art.autoHeight = true;
+    art.autoHeight();
 });
 ```
 
-:::warning 提示
+:::warning Note
 
-This attribute is useful when your container has only width but does not know the specific height. It can automatically calculate the height of the video, but you need to determine the time to set this attribute
+This property is useful when your container has only a width but the exact height is unknown. It can automatically calculate the video height, but you need to determine the timing for setting this property.
 
 :::
 
@@ -703,7 +760,7 @@ This attribute is useful when your container has only width but does not know th
 -   Type: `Function`
 -   Parameter: `String`
 
-Get and set the attributes of the video element dynamically
+Dynamically get and set attributes of the video element.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -720,34 +777,12 @@ art.on('ready', () => {
 });
 ```
 
-## `title`
-
--   Type: `Setter/Getter`
--   Parameter: `String`
-
-Get and set player titles dynamically
-
-<div className="run-code">▶ Run Code</div>
-
-```js{8}
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: '/assets/sample/video.mp4',
-});
-
-art.on('ready', () => {
-    console.info(art.title);
-    art.title = 'New Title';
-    console.info(art.title);
-});
-```
-
 ## `type`
 
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Get and set video types dynamically
+Dynamically get and set the video type.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -769,7 +804,7 @@ art.on('ready', () => {
 -   Type: `Setter/Getter`
 -   Parameter: `String`
 
-Get and set player theme color dynamically
+Dynamically get and set the player's theme color.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -790,11 +825,11 @@ art.on('ready', () => {
 
 -   Type: `Function`
 
-Enable airplay
+Initiate AirPlay.
 
 <div className="run-code">▶ Run Code</div>
 
-```js{10}
+```js{9}
 var art = new Artplayer({
     container: '.artplayer-app',
     url: '/assets/sample/video.mp4',
@@ -814,7 +849,7 @@ var art = new Artplayer({
 
 -   Type: `Getter`
 
-The proportion of video cache, with the range of `[0, 1]`, is often used in conjunction with the `video:timeupdate` event
+The proportion of video buffered, ranging from `[0, 1]`. Often used with the `video:timeupdate` event.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -829,11 +864,30 @@ art.on('video:timeupdate', () => {
 });
 ```
 
+## `loadedTime`
+
+-   Type: `Getter`
+
+The buffered media duration in seconds. Typically used alongside `loaded` to display detailed buffering progress.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{7}
+var art = new Artplayer({
+    container: '.artplayer-app',
+    url: '/assets/sample/video.mp4',
+});
+
+art.on('video:timeupdate', () => {
+    console.info(art.loadedTime);
+});
+```
+
 ## `played`
 
 -   Type: `Getter`
 
-The proportion of video playback, with the range of `[0, 1]`, is often used in conjunction with the `video:timeupdate` event
+The proportion of video played, ranging from `[0, 1]`. Often used with the `video:timeupdate` event.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -852,11 +906,11 @@ art.on('video:timeupdate', () => {
 
 -   Type: `Function`
 
-The proxy function of DOM event essentially proxies `addEventListener` and `removeEventListener`. When `proxy` is used to process the event, the player will also automatically destroy the event when it is destroyed
+A proxy function for `DOM` events, essentially proxying `addEventListener` and `removeEventListener`. When using `proxy` to handle events, the event is automatically cleaned up when the player is destroyed.
 
 <div className="run-code">▶ Run Code</div>
 
-```js{7-10}
+```js{8-10}
 var container = document.querySelector('.artplayer-app');
 
 var art = new Artplayer({
@@ -869,9 +923,9 @@ art.proxy(container, 'click', event => {
 });
 ```
 
-:::warning Tip
+:::warning Note
 
-If you need some DOM events only exist in the life cycle of the player, we strongly recommend using this function to avoid memory leakage
+If you need certain `DOM` events to exist only for the player's lifecycle, it is strongly recommended to use this function to avoid memory leaks.
 
 :::
 
@@ -879,7 +933,7 @@ If you need some DOM events only exist in the life cycle of the player, we stron
 
 -   Type: `Function`
 
-The query function of DOM is similar to `document.querySelector`, but the queried object is limited to the current player, which can avoid errors of the same class name
+A `DOM` query function, similar to `document.querySelector`, but the search is scoped to the current player, preventing errors with duplicate class names.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -896,7 +950,7 @@ console.info(art.query('.art-video'));
 
 -   Type: `Element`
 
-Return the `video` element of the player
+Quickly returns the player's `video` element.
 
 <div className="run-code">▶ Run Code</div>
 
@@ -907,4 +961,116 @@ var art = new Artplayer({
 });
 
 console.info(art.video);
+```
+
+## `cssVar`
+
+-   Type: `Function`
+
+Dynamically get or set `CSS` variables.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{8}
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    console.log(art.cssVar('--art-theme'));
+    art.cssVar('--art-theme', 'green');
+    console.log(art.cssVar('--art-theme'));
+});
+```
+
+## `quality`
+
+-   Type: `Setter`
+-   Parameter: `Array`
+
+Dynamically set the quality list.
+
+<div className="run-code">▶ Run Code</div>
+
+```js{19-29}
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+	quality: [
+		{
+			default: true,
+			html: 'SD 480P',
+			url: '/assets/sample/video.mp4',
+		},
+		{
+			html: 'HD 720P',
+			url: '/assets/sample/video.mp4',
+		},
+	],
+});
+
+art.on('ready', () => {
+	setTimeout(() => {
+		art.quality = [
+			{
+				default: true,
+				html: '1080P',
+				url: '/assets/sample/video.mp4',
+			},
+			{
+				html: '4K',
+				url: '/assets/sample/video.mp4',
+			},
+		];
+	}, 3000);
+})
+
+```
+
+## `thumbnails`
+
+-   Type: `Setter/Getter`
+-   Parameter: `Object`
+
+Dynamically set thumbnails.
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+});
+
+art.on('ready', () => {
+    art.thumbnails = {
+        url: '/assets/sample/thumbnails.png',
+        number: 60,
+        column: 10,
+    };
+});
+```
+
+## `subtitleOffset`
+
+-   Type: `Setter/Getter`
+-   Parameter: `Number`
+
+Dynamically set subtitle offset.
+
+<div className="run-code">▶ Run Code</div>
+
+```js
+var art = new Artplayer({
+	container: '.artplayer-app',
+	url: '/assets/sample/video.mp4',
+    subtitle: {
+        url: '/assets/sample/subtitle.srt',
+    },
+});
+
+art.on('ready', () => {
+    art.subtitleOffset = 1;
+});
 ```

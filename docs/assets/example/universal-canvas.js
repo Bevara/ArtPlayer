@@ -1,27 +1,13 @@
-var art = new Artplayer({
-    container: '.artplayer-app',
-    url: 'https://bevara.ddns.net/test-signals/mpeg1/medical_demo.ts',
-    autoSize: true,
-    fullscreen: true,
-    fullscreenWeb: true,
-    plugins: [
-        UniversalCanvas({
-            using:"solver",
-            with:"rfmpgvid;ffmpeg",
-            scriptDirectory:"https://bevara.ddns.net/accessors/",
-            video: '/assets/sample/test1.mp4',
-            autoplay:true
-            
-        }),
-    ],
-});
-
-// 广告被点击
-art.on('artplayerPluginAds:click', (ads) => {
-    console.info('广告被点击', ads);
-});
-
-// 广告被跳过
-art.on('artplayerPluginAds:skip', (ads) => {
-    console.info('广告被跳过', ads);
-});
+// The Bevara universal canvas draws the decoded source; ArtPlayer drives it
+const art = new Artplayer({
+  container: '.artplayer-app',
+  url: 'https://bevara.github.io/Showcase/mpeg2-canvas/centaur_1.mpg',
+  fullscreen: true,
+  fullscreenWeb: true,
+  proxy: universalCanvas({
+    using: 'solver_1',
+    with: 'libmpeg2_1',
+    scriptDirectory: 'https://registry.bevara.ddns.net/accessors/',
+    script: 'https://registry.bevara.ddns.net/accessors/universal-canvas_1.js',
+  }),
+})

@@ -1,172 +1,208 @@
-import { query, clamp, append, setStyle, secondToTime, includeFromEvent, isMobile } from '../utils';
+import { addClass, append, clamp, getRect, includeFromEvent, isMobile, query, removeClass, secondToTime, setStyle } from '../utils'
 
 export function getPosFromEvent(art, event) {
-    const { $progress } = art.template;
-    const { left } = $progress.getBoundingClientRect();
-    const eventLeft = isMobile ? event.touches[0].clientX : event.clientX;
-    const width = clamp(eventLeft - left, 0, $progress.clientWidth);
-    const second = (width / $progress.clientWidth) * art.duration;
-    const time = secondToTime(second);
-    const percentage = clamp(width / $progress.clientWidth, 0, 1);
-    return { second, time, width, percentage };
+  const { $progress } = art.template
+  const { left } = getRect($progress)
+  const eventLeft = isMobile ? event.touches[0].clientX : event.clientX
+  const width = clamp(eventLeft - left, 0, $progress.clientWidth)
+  const second = (width / $progress.clientWidth) * art.duration
+  const time = secondToTime(second)
+  const percentage = clamp(width / $progress.clientWidth, 0, 1)
+  return { second, time, width, percentage }
 }
 
 export function setCurrentTime(art, event) {
-    if (art.isRotate) {
-        const percentage = event.touches[0].clientY / art.height;
-        const second = percentage * art.duration;
-        art.emit('setBar', 'played', percentage);
-        art.seek = second;
-    } else {
-        const { second, percentage } = getPosFromEvent(art, event);
-        art.emit('setBar', 'played', percentage);
-        art.seek = second;
-    }
+  if (art.isRotate) {
+    const percentage = (event.touches[0].clientY - art.top) / art.height
+    const second = percentage * art.duration
+    art.emit('setBar', 'played', percentage, event)
+    art.seek = second
+  }
+  else {
+    const { second, percentage } = getPosFromEvent(art, event)
+    art.emit('setBar', 'played', percentage, event)
+    art.seek = second
+  }
 }
 
 export default function progress(options) {
-    return (art) => {
-        const { icons, option, proxy } = art;
+  return (art) => {
+    const { icons, option, proxy } = art
+    const { $player, $progress } = art.template
 
-        return {
-            ...options,
-            html: `
+    return {
+      ...options,
+      html: `
                 <div class="art-control-progress-inner">
                     <div class="art-progress-hover"></div>
                     <div class="art-progress-loaded"></div>
                     <div class="art-progress-played"></div>
                     <div class="art-progress-highlight"></div>
                     <div class="art-progress-indicator"></div>
-                    <div class="art-progress-tip"></div>
+                    <div class="art-progress-tip">00:00</div>
                 </div>
             `,
-            mounted: ($control) => {
-                let isDroging = false;
-                const $hover = query('.art-progress-hover', $control);
-                const $loaded = query('.art-progress-loaded', $control);
-                const $played = query('.art-progress-played', $control);
-                const $highlight = query('.art-progress-highlight', $control);
-                const $indicator = query('.art-progress-indicator', $control);
-                const $tip = query('.art-progress-tip', $control);
+      mounted: ($control) => {
+        let tipTimer = null
+        let isDragging = false
 
-                if (icons.indicator) {
-                    append($indicator, icons.indicator);
-                } else {
-                    setStyle($indicator, 'backgroundColor', 'var(--art-theme)');
-                }
+        const $hover = query('.art-progress-hover', $control)
+        const $loaded = query('.art-progress-loaded', $control)
+        const $played = query('.art-progress-played', $control)
+        const $highlight = query('.art-progress-highlight', $control)
+        const $indicator = query('.art-progress-indicator', $control)
+        const $tip = query('.art-progress-tip', $control)
 
-                function showHighlight(event) {
-                    const { width } = getPosFromEvent(art, event);
-                    const { text } = event.target.dataset;
-                    $tip.innerHTML = text;
-                    const tipWidth = $tip.clientWidth;
-                    if (width <= tipWidth / 2) {
-                        setStyle($tip, 'left', 0);
-                    } else if (width > $control.clientWidth - tipWidth / 2) {
-                        setStyle($tip, 'left', `${$control.clientWidth - tipWidth}px`);
-                    } else {
-                        setStyle($tip, 'left', `${width - tipWidth / 2}px`);
-                    }
-                }
+        if (icons.indicator) {
+          append($indicator, icons.indicator)
+        }
+        else {
+          setStyle($indicator, 'backgroundColor', 'var(--art-theme)')
+        }
 
-                function showTime(event) {
-                    const { width, time } = getPosFromEvent(art, event);
-                    $tip.innerHTML = time;
-                    const tipWidth = $tip.clientWidth;
-                    if (width <= tipWidth / 2) {
-                        setStyle($tip, 'left', 0);
-                    } else if (width > $control.clientWidth - tipWidth / 2) {
-                        setStyle($tip, 'left', `${$control.clientWidth - tipWidth}px`);
-                    } else {
-                        setStyle($tip, 'left', `${width - tipWidth / 2}px`);
-                    }
-                }
+        function showHighlight(event) {
+          const { width } = getPosFromEvent(art, event)
+          const { text } = event.target.dataset
+          $tip.textContent = text
+          const tipWidth = $tip.clientWidth
+          if (width <= tipWidth / 2) {
+            setStyle($tip, 'left', 0)
+          }
+          else if (width > $control.clientWidth - tipWidth / 2) {
+            setStyle($tip, 'left', `${$control.clientWidth - tipWidth}px`)
+          }
+          else {
+            setStyle($tip, 'left', `${width - tipWidth / 2}px`)
+          }
+        }
 
-                function setBar(type, percentage) {
-                    if (type === 'loaded') {
-                        setStyle($loaded, 'width', `${percentage * 100}%`);
-                    }
+        function showTime(event, touch) {
+          const { width, time } = touch || getPosFromEvent(art, event)
+          $tip.textContent = time || '00:00'
+          const tipWidth = $tip.clientWidth
+          if (width <= tipWidth / 2) {
+            setStyle($tip, 'left', 0)
+          }
+          else if (width > $control.clientWidth - tipWidth / 2) {
+            setStyle($tip, 'left', `${$control.clientWidth - tipWidth}px`)
+          }
+          else {
+            setStyle($tip, 'left', `${width - tipWidth / 2}px`)
+          }
+        }
 
-                    if (type === 'played') {
-                        setStyle($played, 'width', `${percentage * 100}%`);
-                        setStyle($indicator, 'left', `${percentage * 100}%`);
-                    }
-                }
+        function updateHighlight() {
+          $highlight.textContent = ''
+          for (let index = 0; index < option.highlight.length; index++) {
+            const item = option.highlight[index]
+            const left = (clamp(item.time, 0, art.duration) / art.duration) * 100
+            const html = `<span data-text="${item.text}" data-time="${item.time}" style="left: ${left}%"></span>`
+            append($highlight, html)
+          }
+        }
 
-                function setHover(event) {
-                    const { width } = getPosFromEvent(art, event);
-                    setStyle($hover, 'width', `${width}px`);
-                    setStyle($hover, 'display', 'flex');
-                }
+        function setBar(type, percentage, event) {
+          const isMobileDragging = type === 'played' && event && isMobile
 
-                art.on('video:loadedmetadata', () => {
-                    for (let index = 0; index < option.highlight.length; index++) {
-                        const item = option.highlight[index];
-                        const left = (clamp(item.time, 0, art.duration) / art.duration) * 100;
-                        const html = `<span data-text="${item.text}" data-time="${item.time}" style="left: ${left}%"></span>`;
-                        append($highlight, html);
-                    }
-                });
+          if (type === 'loaded') {
+            setStyle($loaded, 'width', `${percentage * 100}%`)
+          }
 
-                setBar('loaded', art.loaded);
+          if (type === 'hover') {
+            setStyle($hover, 'width', `${percentage * 100}%`)
 
-                art.on('setBar', (type, percentage) => {
-                    setBar(type, percentage);
-                });
+            if (includeFromEvent(event, $highlight)) {
+              showHighlight(event)
+            }
+            else {
+              showTime(event)
+            }
 
-                art.on('video:progress', () => {
-                    setBar('loaded', art.loaded);
-                });
+            if (percentage === 0) {
+              removeClass($player, 'art-progress-hover')
+            }
+            else {
+              addClass($player, 'art-progress-hover')
+            }
+          }
 
-                art.on('video:timeupdate', () => {
-                    setBar('played', art.played);
-                });
+          if (type === 'played') {
+            setStyle($played, 'width', `${percentage * 100}%`)
+            setStyle($indicator, 'left', `${percentage * 100}%`)
+          }
 
-                art.on('video:ended', () => {
-                    setBar('played', 1);
-                });
+          if (isMobileDragging) {
+            addClass($player, 'art-progress-hover')
+            const width = $control.clientWidth * percentage
+            const time = secondToTime(percentage * art.duration)
+            showTime(event, { width, time })
+            clearTimeout(tipTimer)
+            tipTimer = setTimeout(() => {
+              removeClass($player, 'art-progress-hover')
+            }, 500)
+          }
+        }
 
-                if (!isMobile) {
-                    proxy($control, 'click', (event) => {
-                        if (event.target !== $indicator) {
-                            setCurrentTime(art, event);
-                        }
-                    });
+        art.on('setBar', setBar)
+        art.on('video:loadedmetadata', updateHighlight)
 
-                    proxy($control, 'mousemove', (event) => {
-                        setHover(event);
-                        setStyle($tip, 'display', 'flex');
-                        if (includeFromEvent(event, $highlight)) {
-                            showHighlight(event);
-                        } else {
-                            showTime(event);
-                        }
-                    });
+        if (art.constructor.USE_RAF) {
+          art.on('raf', () => {
+            art.emit('setBar', 'played', art.played)
+            art.emit('setBar', 'loaded', art.loaded)
+          })
+        }
+        else {
+          art.on('video:timeupdate', () => {
+            art.emit('setBar', 'played', art.played)
+          })
 
-                    proxy($control, 'mouseleave', () => {
-                        setStyle($tip, 'display', 'none');
-                        setStyle($hover, 'display', 'none');
-                    });
+          art.on('video:progress', () => {
+            art.emit('setBar', 'loaded', art.loaded)
+          })
 
-                    proxy($control, 'mousedown', (event) => {
-                        isDroging = event.button === 0;
-                    });
+          art.on('video:ended', () => {
+            art.emit('setBar', 'played', 1)
+          })
+        }
 
-                    art.on('document:mousemove', (event) => {
-                        if (isDroging) {
-                            const { second, percentage } = getPosFromEvent(art, event);
-                            setBar('played', percentage);
-                            art.seek = second;
-                        }
-                    });
+        art.emit('setBar', 'loaded', art.loaded || 0)
 
-                    art.on('document:mouseup', () => {
-                        if (isDroging) {
-                            isDroging = false;
-                        }
-                    });
-                }
-            },
-        };
-    };
+        if (!isMobile) {
+          proxy($progress, 'click', (event) => {
+            if (event.target !== $indicator) {
+              setCurrentTime(art, event)
+            }
+          })
+
+          proxy($progress, 'mousemove', (event) => {
+            const { percentage } = getPosFromEvent(art, event)
+            art.emit('setBar', 'hover', percentage, event)
+          })
+
+          proxy($progress, 'mouseleave', (event) => {
+            art.emit('setBar', 'hover', 0, event)
+          })
+
+          proxy($progress, 'mousedown', (event) => {
+            isDragging = event.button === 0
+          })
+
+          art.on('document:mousemove', (event) => {
+            if (isDragging) {
+              const { second, percentage } = getPosFromEvent(art, event)
+              art.emit('setBar', 'played', percentage, event)
+              art.seek = second
+            }
+          })
+
+          art.on('document:mouseup', () => {
+            if (isDragging) {
+              isDragging = false
+            }
+          })
+        }
+      },
+    }
+  }
 }
