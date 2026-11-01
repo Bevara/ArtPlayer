@@ -7,7 +7,7 @@ const art = new Artplayer({
   fullscreenWeb: true,
   plugins: [
     universalVideo({
-      using: 'solver_1',
+      using: 'mm_solver_1.0.1',
       with: 'libmpeg2_1',
       scriptDirectory: 'https://registry.bevara.ddns.net/accessors/',
       script: 'https://registry.bevara.ddns.net/accessors/universal-video_1.js',

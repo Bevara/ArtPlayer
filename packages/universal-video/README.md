@@ -13,7 +13,7 @@ const art = new Artplayer({
   url: 'https://bevara.ddns.net/test-signals/mpeg1/medical_demo.ts',
   plugins: [
     universalVideo({
-      using: 'solver_1',
+      using: 'mm_solver_1.0.1',
       with: 'm2psdmx_1;rfmpgvid_1;ffmpeg_1;mp4mx_1;rfnalu_1',
       scriptDirectory: 'https://bevara.ddns.net/accessors/',
     }),

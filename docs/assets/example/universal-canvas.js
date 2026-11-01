@@ -5,7 +5,7 @@ const art = new Artplayer({
   fullscreen: true,
   fullscreenWeb: true,
   proxy: universalCanvas({
-    using: 'solver_1',
+    using: 'mm_solver_1.0.1',
     with: 'libmpeg2_1',
     scriptDirectory: 'https://registry.bevara.ddns.net/accessors/',
     script: 'https://registry.bevara.ddns.net/accessors/universal-canvas_1.js',

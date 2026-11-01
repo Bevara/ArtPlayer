@@ -1,7 +1,7 @@
 /* <canvas is="art-player_1">: the universal canvas inside an ArtPlayer.
  *
  *   <script src="art-player_1.js"></script>
- *   <canvas is="art-player_1" src="movie.mpg" using="solver_1" with="libmpeg2_1"
+ *   <canvas is="art-player_1" src="movie.mpg" using="mm_solver_1.0.1" with="libmpeg2_1"
  *           style="width: 640px; height: 360px"></canvas>
  *
  * The source is decoded by the Bevara pipeline - the solver named by using,

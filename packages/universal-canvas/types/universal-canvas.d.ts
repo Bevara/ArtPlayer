@@ -1,7 +1,7 @@
 import type Artplayer from 'artplayer'
 
 interface Option {
-  /** the solver the universal canvas loads, e.g. "solver_1" */
+  /** the solver the universal canvas loads, e.g. "mm_solver_1.0.1" */
   using: string
   /** the accessors, separated by ";", e.g. "rfmpgvid;ffmpeg" */
   with?: string

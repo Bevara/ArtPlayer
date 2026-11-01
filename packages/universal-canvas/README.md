@@ -20,7 +20,7 @@ sought: set `isLive: true` for those.
     container: '.artplayer-app',
     url: 'https://bevara.ddns.net/test-signals/mpeg1/medical_demo.ts',
     proxy: universalCanvas({
-      using: 'solver_1',
+      using: 'mm_solver_1.0.1',
       with: 'rfmpgvid_1;ffmpeg_1',
       scriptDirectory: 'https://bevara.ddns.net/accessors/',
     }),

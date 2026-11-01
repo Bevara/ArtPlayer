@@ -5,7 +5,7 @@ import mediaFacade from './media.js'
  *   new Artplayer({
  *     container: '.artplayer-app',
  *     url: 'movie.ts',
- *     proxy: universalCanvas({ using: 'solver_1', with: 'rfmpgvid;ffmpeg', scriptDirectory: 'https://…/accessors/' }),
+ *     proxy: universalCanvas({ using: 'mm_solver_1.0.1', with: 'rfmpgvid;ffmpeg', scriptDirectory: 'https://…/accessors/' }),
  *   })
  *
  * The proxy returns a <canvas is="universal-canvas_1"> that ArtPlayer drives as

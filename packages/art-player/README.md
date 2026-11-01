@@ -12,7 +12,7 @@ knows the duration of the source. A source whose demultiplexer cannot tell it
 <canvas
   is="art-player_1"
   src="movie.mpg"
-  using="solver_1"
+  using="mm_solver_1.0.1"
   with="libmpeg2_1"
   style="width: 640px; height: 360px"
 ></canvas>
